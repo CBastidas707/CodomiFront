@@ -93,10 +93,11 @@ const NotificationDropdown: React.FC = () => {
       </DropdownMenuTrigger>
       <DropdownMenuContent
         align="end"
-        className="w-96 max-h-96 bg-white shadow-2xl border-0 rounded-xl"
+        className="w-96 bg-white shadow-2xl border border-gray-200 rounded-2xl overflow-hidden p-0"
         sideOffset={8}
       >
-        <div className="p-4 border-b border-slate-100 bg-codomi-navy text-white rounded-t-xl">
+        {/* Header con barra azul que ocupa 100% del ancho */}
+        <div className="bg-codomi-navy text-white p-4 w-full">
           <div className="flex items-center justify-between">
             <h3 className="font-bold text-lg">Notificaciones</h3>
             {unreadCount > 0 && (
@@ -107,6 +108,7 @@ const NotificationDropdown: React.FC = () => {
           </div>
         </div>
         
+        {/* Contenido de notificaciones */}
         {notifications.length === 0 ? (
           <div className="p-8 text-center text-slate-500">
             <Bell className="h-12 w-12 mx-auto mb-3 text-slate-300" />
@@ -117,34 +119,36 @@ const NotificationDropdown: React.FC = () => {
             {notifications.map((notification, index) => (
               <DropdownMenuItem
                 key={notification.id}
-                className="p-0 focus:bg-slate-50 border-b border-slate-50 last:border-b-0"
+                className="p-0 focus:bg-slate-50 border-b border-slate-100 last:border-b-0 cursor-pointer"
                 onSelect={() => markAsRead(notification.id)}
               >
                 <div className="w-full p-4 relative hover:bg-slate-50 transition-colors duration-150">
+                  {/* Botón X más visible y claro */}
                   <button
                     onClick={(e) => removeNotification(notification.id, e)}
-                    className="absolute top-3 right-3 text-slate-400 hover:text-red-500 transition-colors duration-150 w-6 h-6 flex items-center justify-center rounded-full hover:bg-red-50"
+                    className="absolute top-2 right-2 w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 hover:bg-red-100 text-gray-400 hover:text-red-500 transition-all duration-200 shadow-sm hover:shadow-md"
+                    title="Eliminar notificación"
                   >
-                    <X className="h-3 w-3" />
+                    <X className="h-4 w-4" />
                   </button>
                   
-                  <div className="pr-8">
+                  <div className="pr-10">
                     <div className="flex items-center gap-3 mb-2">
-                      <div className={`w-2 h-2 rounded-full ${!notification.read ? 'bg-blue-500' : 'bg-slate-300'}`} />
-                      <h4 className={`text-sm font-semibold ${!notification.read ? 'text-slate-900' : 'text-slate-600'} flex-1`}>
+                      <div className={`w-3 h-3 rounded-full flex-shrink-0 ${!notification.read ? 'bg-blue-500' : 'bg-slate-300'}`} />
+                      <h4 className={`text-sm font-semibold flex-1 ${!notification.read ? 'text-slate-900' : 'text-slate-600'}`}>
                         {notification.title}
                       </h4>
                       {notification.urgent && (
                         <div className="flex items-center gap-1">
                           <AlertTriangle className="h-3 w-3 text-red-500" />
-                          <Badge variant="destructive" className="text-xs px-2 py-0">
+                          <Badge variant="destructive" className="text-xs px-2 py-0 h-5">
                             Urgente
                           </Badge>
                         </div>
                       )}
                     </div>
                     
-                    <p className="text-xs text-slate-600 mb-2 leading-relaxed">
+                    <p className="text-xs text-slate-600 mb-3 leading-relaxed">
                       {notification.message}
                     </p>
                     
