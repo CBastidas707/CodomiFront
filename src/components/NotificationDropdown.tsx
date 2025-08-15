@@ -122,17 +122,17 @@ const NotificationDropdown: React.FC = () => {
                 className="p-0 focus:bg-transparent border-b border-slate-100 last:border-b-0 cursor-pointer"
                 onSelect={() => markAsRead(notification.id)}
               >
-                <div className="w-full p-4 relative hover:bg-slate-200 transition-colors duration-200 group">
-                  {/* Botón X más visible y claro */}
+                <div className="w-full p-4 relative hover:bg-slate-100 transition-colors duration-200 group">
+                  {/* Botón X natural y discreto - solo visible en hover */}
                   <button
                     onClick={(e) => removeNotification(notification.id, e)}
-                    className="absolute top-3 right-3 w-7 h-7 flex items-center justify-center rounded-full bg-slate-300 hover:bg-red-500 text-slate-600 hover:text-white transition-all duration-200 shadow-sm opacity-80 hover:opacity-100"
+                    className="absolute top-3 right-3 p-1 opacity-0 group-hover:opacity-100 text-slate-400 hover:text-slate-700 transition-all duration-200"
                     title="Eliminar notificación"
                   >
-                    <X className="h-4 w-4 font-bold" />
+                    <X className="h-4 w-4" />
                   </button>
                   
-                  <div className="pr-12">
+                  <div className="pr-10">
                     <div className="flex items-center gap-3 mb-2">
                       <div className={`w-3 h-3 rounded-full flex-shrink-0 ${!notification.read ? 'bg-blue-500' : 'bg-slate-300'}`} />
                       <h4 className={`text-sm font-semibold flex-1 ${!notification.read ? 'text-slate-900' : 'text-slate-600'}`}>
