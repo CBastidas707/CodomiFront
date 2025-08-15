@@ -119,20 +119,20 @@ const NotificationDropdown: React.FC = () => {
             {notifications.map((notification, index) => (
               <DropdownMenuItem
                 key={notification.id}
-                className="p-0 focus:bg-slate-50 border-b border-slate-100 last:border-b-0 cursor-pointer"
+                className="p-0 focus:bg-transparent border-b border-slate-100 last:border-b-0 cursor-pointer"
                 onSelect={() => markAsRead(notification.id)}
               >
-                <div className="w-full p-4 relative hover:bg-slate-50 transition-colors duration-150">
+                <div className="w-full p-4 relative hover:bg-slate-200 transition-colors duration-200 group">
                   {/* Botón X más visible y claro */}
                   <button
                     onClick={(e) => removeNotification(notification.id, e)}
-                    className="absolute top-2 right-2 w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 hover:bg-red-100 text-gray-400 hover:text-red-500 transition-all duration-200 shadow-sm hover:shadow-md"
+                    className="absolute top-3 right-3 w-7 h-7 flex items-center justify-center rounded-full bg-slate-300 hover:bg-red-500 text-slate-600 hover:text-white transition-all duration-200 shadow-sm opacity-80 hover:opacity-100"
                     title="Eliminar notificación"
                   >
-                    <X className="h-4 w-4" />
+                    <X className="h-4 w-4 font-bold" />
                   </button>
                   
-                  <div className="pr-10">
+                  <div className="pr-12">
                     <div className="flex items-center gap-3 mb-2">
                       <div className={`w-3 h-3 rounded-full flex-shrink-0 ${!notification.read ? 'bg-blue-500' : 'bg-slate-300'}`} />
                       <h4 className={`text-sm font-semibold flex-1 ${!notification.read ? 'text-slate-900' : 'text-slate-600'}`}>
