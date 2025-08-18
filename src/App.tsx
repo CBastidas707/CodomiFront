@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -19,6 +18,7 @@ import JuntaDashboard from "./pages/junta/JuntaDashboard";
 import JuntaAnnouncements from "./pages/junta/JuntaAnnouncements";
 import JuntaCommunication from "./pages/junta/JuntaCommunication";
 import NotFound from "./pages/NotFound";
+import AdminOwners from "./pages/admin/AdminOwners";
 
 const queryClient = new QueryClient();
 
@@ -64,6 +64,11 @@ const AppRoutes = () => {
         <Route path="/admin" element={
           <ProtectedRoute allowedRoles={['admin']}>
             <AdminDashboard />
+          </ProtectedRoute>
+        } />
+        <Route path="/admin/owners" element={
+          <ProtectedRoute allowedRoles={['admin']}>
+            <AdminOwners />
           </ProtectedRoute>
         } />
         <Route path="/admin/announcements" element={
