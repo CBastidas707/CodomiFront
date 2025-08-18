@@ -1,6 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -35,6 +36,9 @@ const OwnerForm: React.FC<OwnerFormProps> = ({
   const [linkedApartments, setLinkedApartments] = useState<Apartment[]>([]);
   const [apartmentSearch, setApartmentSearch] = useState('');
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [showUnlinkConfirm, setShowUnlinkConfirm] = useState(false);
+  const [showSaveConfirm, setShowSaveConfirm] = useState(false);
+  const [apartmentToUnlink, setApartmentToUnlink] = useState<string | null>(null);
 
   useEffect(() => {
     if (owner) {
@@ -87,6 +91,10 @@ const OwnerForm: React.FC<OwnerFormProps> = ({
       return;
     }
 
+    setShowSaveConfirm(true);
+  };
+
+  const confirmSave = () => {
     const newOwner: Owner = {
       id: owner?.id || `owner-${Date.now()}`,
       ...formData,
@@ -100,6 +108,7 @@ const OwnerForm: React.FC<OwnerFormProps> = ({
       title: owner ? 'Propietario actualizado' : 'Propietario creado',
       description: `${formData.name} ha sido ${owner ? 'actualizado' : 'creado'} exitosamente.`
     });
+    setShowSaveConfirm(false);
   };
 
   const handleLinkApartment = (apartment: Apartment) => {
@@ -110,7 +119,16 @@ const OwnerForm: React.FC<OwnerFormProps> = ({
   };
 
   const handleUnlinkApartment = (apartmentId: string) => {
-    setLinkedApartments(linkedApartments.filter(apt => apt.id !== apartmentId));
+    setApartmentToUnlink(apartmentId);
+    setShowUnlinkConfirm(true);
+  };
+
+  const confirmUnlinkApartment = () => {
+    if (apartmentToUnlink) {
+      setLinkedApartments(linkedApartments.filter(apt => apt.id !== apartmentToUnlink));
+      setApartmentToUnlink(null);
+    }
+    setShowUnlinkConfirm(false);
   };
 
   const filteredApartments = availableApartments.filter(apt => 
@@ -119,186 +137,231 @@ const OwnerForm: React.FC<OwnerFormProps> = ({
      apt.buildingName.toLowerCase().includes(apartmentSearch.toLowerCase()))
   );
 
+  const apartmentToUnlinkData = linkedApartments.find(apt => apt.id === apartmentToUnlink);
+
   return (
-    <Dialog open={true} onOpenChange={() => onClose()}>
-      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>
-            {owner ? 'Editar Propietario' : 'Crear Nuevo Propietario'}
-          </DialogTitle>
-        </DialogHeader>
+    <>
+      <Dialog open={true} onOpenChange={() => onClose()}>
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>
+              {owner ? 'Editar Propietario' : 'Crear Nuevo Propietario'}
+            </DialogTitle>
+          </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Basic Information */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Información Personal</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="name" className="text-sm font-medium">
-                    Nombre *
-                  </Label>
-                  <Input
-                    id="name"
-                    value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    className={errors.name ? 'border-red-500' : ''}
-                  />
-                  {errors.name && (
-                    <p className="text-red-500 text-xs mt-1">{errors.name}</p>
-                  )}
-                </div>
-
-                <div>
-                  <Label className="text-sm font-medium">Tipo de Documento *</Label>
-                  <Select 
-                    value={formData.documentType} 
-                    onValueChange={(value: 'cedula' | 'rif') => 
-                      setFormData({ ...formData, documentType: value, documentNumber: '' })
-                    }
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="cedula">Cédula</SelectItem>
-                      <SelectItem value="rif">RIF</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div>
-                  <Label htmlFor="documentNumber" className="text-sm font-medium">
-                    Número de {formData.documentType === 'cedula' ? 'Cédula' : 'RIF'} *
-                  </Label>
-                  <Input
-                    id="documentNumber"
-                    placeholder={formData.documentType === 'cedula' ? 'V-12345678' : 'J-12345678-9'}
-                    value={formData.documentNumber}
-                    onChange={(e) => setFormData({ ...formData, documentNumber: e.target.value })}
-                    className={errors.documentNumber ? 'border-red-500' : ''}
-                  />
-                  {errors.documentNumber && (
-                    <p className="text-red-500 text-xs mt-1">{errors.documentNumber}</p>
-                  )}
-                </div>
-
-                <div>
-                  <Label htmlFor="email" className="text-sm font-medium">Email</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    value={formData.email}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    className={errors.email ? 'border-red-500' : ''}
-                  />
-                  {errors.email && (
-                    <p className="text-red-500 text-xs mt-1">{errors.email}</p>
-                  )}
-                </div>
-
-                <div className="md:col-span-2">
-                  <Label htmlFor="phone" className="text-sm font-medium">Teléfono</Label>
-                  <Input
-                    id="phone"
-                    placeholder="+58-412-1234567"
-                    value={formData.phone}
-                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                  />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Apartment Management */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Gestión de Apartamentos</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {/* Linked Apartments */}
-              <div>
-                <Label className="text-sm font-medium mb-2 block">
-                  Apartamentos Vinculados ({linkedApartments.length})
-                </Label>
-                {linkedApartments.length > 0 ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                    {linkedApartments.map(apartment => (
-                      <div key={apartment.id} className="flex items-center justify-between p-2 border rounded">
-                        <div className="flex-1">
-                          <p className="text-sm font-medium">{apartment.buildingName}</p>
-                          <p className="text-xs text-gray-600">Apartamento {apartment.number}</p>
-                        </div>
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleUnlinkApartment(apartment.id)}
-                          className="text-red-500 hover:text-red-700"
-                        >
-                          <Unlink className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    ))}
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Basic Information */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Información Personal</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="name" className="text-sm font-medium">
+                      Nombre *
+                    </Label>
+                    <Input
+                      id="name"
+                      value={formData.name}
+                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                      className={errors.name ? 'border-red-500' : ''}
+                    />
+                    {errors.name && (
+                      <p className="text-red-500 text-xs mt-1">{errors.name}</p>
+                    )}
                   </div>
-                ) : (
-                  <p className="text-gray-500 text-sm">No hay apartamentos vinculados</p>
-                )}
-              </div>
 
-              {/* Search and Link Apartments */}
-              <div>
-                <Label className="text-sm font-medium mb-2 block">
-                  Buscar y Vincular Apartamentos
-                </Label>
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                  <Input
-                    placeholder="Buscar por número de apartamento o edificio..."
-                    value={apartmentSearch}
-                    onChange={(e) => setApartmentSearch(e.target.value)}
-                    className="pl-10"
-                  />
+                  <div>
+                    <Label className="text-sm font-medium">Tipo de Documento *</Label>
+                    <Select 
+                      value={formData.documentType} 
+                      onValueChange={(value: 'cedula' | 'rif') => 
+                        setFormData({ ...formData, documentType: value, documentNumber: '' })
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="cedula">Cédula</SelectItem>
+                        <SelectItem value="rif">RIF</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="documentNumber" className="text-sm font-medium">
+                      Número de {formData.documentType === 'cedula' ? 'Cédula' : 'RIF'} *
+                    </Label>
+                    <Input
+                      id="documentNumber"
+                      placeholder={formData.documentType === 'cedula' ? 'V-12345678' : 'J-12345678-9'}
+                      value={formData.documentNumber}
+                      onChange={(e) => setFormData({ ...formData, documentNumber: e.target.value })}
+                      className={errors.documentNumber ? 'border-red-500' : ''}
+                    />
+                    {errors.documentNumber && (
+                      <p className="text-red-500 text-xs mt-1">{errors.documentNumber}</p>
+                    )}
+                  </div>
+
+                  <div>
+                    <Label htmlFor="email" className="text-sm font-medium">Email</Label>
+                    <Input
+                      id="email"
+                      type="email"
+                      value={formData.email}
+                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                      className={errors.email ? 'border-red-500' : ''}
+                    />
+                    {errors.email && (
+                      <p className="text-red-500 text-xs mt-1">{errors.email}</p>
+                    )}
+                  </div>
+
+                  <div className="md:col-span-2">
+                    <Label htmlFor="phone" className="text-sm font-medium">Teléfono</Label>
+                    <Input
+                      id="phone"
+                      placeholder="+58-412-1234567"
+                      value={formData.phone}
+                      onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                    />
+                  </div>
                 </div>
-                {apartmentSearch && (
-                  <div className="mt-2 max-h-32 overflow-y-auto border rounded">
-                    {filteredApartments.length > 0 ? (
-                      filteredApartments.map(apartment => (
-                        <div
-                          key={apartment.id}
-                          className="flex items-center justify-between p-2 hover:bg-gray-50 cursor-pointer"
-                          onClick={() => handleLinkApartment(apartment)}
-                        >
-                          <div>
+              </CardContent>
+            </Card>
+
+            {/* Apartment Management */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Gestión de Apartamentos</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {/* Linked Apartments */}
+                <div>
+                  <Label className="text-sm font-medium mb-2 block">
+                    Apartamentos Vinculados ({linkedApartments.length})
+                  </Label>
+                  {linkedApartments.length > 0 ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                      {linkedApartments.map(apartment => (
+                        <div key={apartment.id} className="flex items-center justify-between p-2 border rounded">
+                          <div className="flex-1">
                             <p className="text-sm font-medium">{apartment.buildingName}</p>
                             <p className="text-xs text-gray-600">Apartamento {apartment.number}</p>
                           </div>
-                          <Plus className="h-4 w-4 text-green-500" />
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleUnlinkApartment(apartment.id)}
+                            className="text-red-500 hover:text-red-700"
+                          >
+                            <Unlink className="h-4 w-4" />
+                          </Button>
                         </div>
-                      ))
-                    ) : (
-                      <p className="p-2 text-sm text-gray-500">No se encontraron apartamentos</p>
-                    )}
-                  </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-gray-500 text-sm">No hay apartamentos vinculados</p>
+                  )}
+                </div>
 
-          {/* Actions */}
-          <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t">
-            <Button type="submit" className="bg-codomi-navy hover:bg-codomi-navy-dark">
-              {owner ? 'Actualizar Propietario' : 'Crear Propietario'}
-            </Button>
-            <Button type="button" variant="outline" onClick={onClose}>
+                {/* Search and Link Apartments */}
+                <div>
+                  <Label className="text-sm font-medium mb-2 block">
+                    Buscar y Vincular Apartamentos
+                  </Label>
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                    <Input
+                      placeholder="Buscar por número de apartamento o edificio..."
+                      value={apartmentSearch}
+                      onChange={(e) => setApartmentSearch(e.target.value)}
+                      className="pl-10"
+                    />
+                  </div>
+                  {apartmentSearch && (
+                    <div className="mt-2 max-h-32 overflow-y-auto border rounded">
+                      {filteredApartments.length > 0 ? (
+                        filteredApartments.map(apartment => (
+                          <div
+                            key={apartment.id}
+                            className="flex items-center justify-between p-2 hover:bg-gray-50 cursor-pointer"
+                            onClick={() => handleLinkApartment(apartment)}
+                          >
+                            <div>
+                              <p className="text-sm font-medium">{apartment.buildingName}</p>
+                              <p className="text-xs text-gray-600">Apartamento {apartment.number}</p>
+                            </div>
+                            <Plus className="h-4 w-4 text-green-500" />
+                          </div>
+                        ))
+                      ) : (
+                        <p className="p-2 text-sm text-gray-500">No se encontraron apartamentos</p>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Actions */}
+            <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t">
+              <Button type="submit" className="bg-codomi-navy hover:bg-codomi-navy-dark">
+                {owner ? 'Actualizar Propietario' : 'Crear Propietario'}
+              </Button>
+              <Button type="button" variant="outline" onClick={onClose}>
+                Cancelar
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Unlink Apartment Confirmation */}
+      <AlertDialog open={showUnlinkConfirm} onOpenChange={setShowUnlinkConfirm}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmar Desvinculación</AlertDialogTitle>
+            <AlertDialogDescription>
+              ¿Está seguro de que desea desvincular el apartamento {apartmentToUnlinkData?.number} del edificio {apartmentToUnlinkData?.buildingName}?
+              Esta acción no se puede deshacer.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setShowUnlinkConfirm(false)}>
               Cancelar
-            </Button>
-          </div>
-        </form>
-      </DialogContent>
-    </Dialog>
+            </AlertDialogCancel>
+            <AlertDialogAction onClick={confirmUnlinkApartment} className="bg-red-600 hover:bg-red-700">
+              Desvincular
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Save Confirmation */}
+      <AlertDialog open={showSaveConfirm} onOpenChange={setShowSaveConfirm}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmar Cambios</AlertDialogTitle>
+            <AlertDialogDescription>
+              ¿Está seguro de que desea {owner ? 'actualizar' : 'crear'} los datos del propietario {formData.name}?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setShowSaveConfirm(false)}>
+              Cancelar
+            </AlertDialogCancel>
+            <AlertDialogAction onClick={confirmSave} className="bg-codomi-navy hover:bg-codomi-navy-dark">
+              {owner ? 'Actualizar' : 'Crear'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 };
 

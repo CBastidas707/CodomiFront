@@ -1,11 +1,12 @@
 
 import React, { useState, useMemo } from 'react';
-import { Plus, Search, Filter } from 'lucide-react';
+import { Plus, Search, Filter, User, Phone, Mail } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useAuth } from '@/contexts/AuthContext';
 import { Owner, Apartment } from '@/types/owner';
 import OwnerProfileDialog from '@/components/OwnerProfileDialog';
@@ -155,66 +156,110 @@ const AdminOwners: React.FC = () => {
         </CardContent>
       </Card>
 
-      {/* Owners Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredOwners.map(owner => {
-          const apartments = getOwnerApartments(owner.id);
-          return (
-            <Card key={owner.id} className="hover:shadow-lg transition-shadow">
-              <CardHeader>
-                <CardTitle className="text-lg">{owner.name}</CardTitle>
-                <div className="flex items-center gap-2 text-sm text-gray-600">
-                  <Badge variant="outline">
-                    {owner.documentType.toUpperCase()}: {owner.documentNumber}
-                  </Badge>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  <div>
-                    <p className="text-sm font-medium text-gray-700 mb-2">
-                      Apartamentos ({apartments.length})
-                    </p>
-                    <div className="flex flex-wrap gap-1">
-                      {apartments.map(apt => (
-                        <Badge key={apt.id} variant="secondary" className="text-xs">
-                          {apt.buildingName} - {apt.number}
+      {/* Owners List */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Propietarios ({filteredOwners.length})</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {filteredOwners.length > 0 ? (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Propietario</TableHead>
+                  <TableHead>Documento</TableHead>
+                  <TableHead>Contacto</TableHead>
+                  <TableHead>Apartamentos</TableHead>
+                  <TableHead className="text-right">Acciones</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredOwners.map(owner => {
+                  const apartments = getOwnerApartments(owner.id);
+                  return (
+                    <TableRow key={owner.id} className="hover:bg-gray-50">
+                      <TableCell>
+                        <div className="flex items-center gap-3">
+                          <div className="h-10 w-10 bg-gray-100 rounded-full flex items-center justify-center">
+                            <User className="h-5 w-5 text-gray-600" />
+                          </div>
+                          <div>
+                            <p className="font-medium text-gray-900">{owner.name}</p>
+                            <p className="text-sm text-gray-500">
+                              Creado: {new Date(owner.createdAt).toLocaleDateString()}
+                            </p>
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="outline">
+                          {owner.documentType.toUpperCase()}: {owner.documentNumber}
                         </Badge>
-                      ))}
-                    </div>
-                  </div>
-                  <div className="flex gap-2 pt-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleViewOwner(owner)}
-                      className="flex-1"
-                    >
-                      Ver
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleEditOwner(owner)}
-                      className="flex-1"
-                    >
-                      Editar
-                    </Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          );
-        })}
-      </div>
-
-      {filteredOwners.length === 0 && (
-        <Card>
-          <CardContent className="p-12 text-center">
-            <p className="text-gray-500">No se encontraron propietarios con los filtros seleccionados.</p>
-          </CardContent>
-        </Card>
-      )}
+                      </TableCell>
+                      <TableCell>
+                        <div className="space-y-1">
+                          {owner.email && (
+                            <div className="flex items-center gap-1 text-sm text-gray-600">
+                              <Mail className="h-3 w-3" />
+                              {owner.email}
+                            </div>
+                          )}
+                          {owner.phone && (
+                            <div className="flex items-center gap-1 text-sm text-gray-600">
+                              <Phone className="h-3 w-3" />
+                              {owner.phone}
+                            </div>
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="space-y-1">
+                          <p className="text-sm font-medium">{apartments.length} apartamento(s)</p>
+                          <div className="flex flex-wrap gap-1">
+                            {apartments.slice(0, 2).map(apt => (
+                              <Badge key={apt.id} variant="secondary" className="text-xs">
+                                {apt.buildingName} - {apt.number}
+                              </Badge>
+                            ))}
+                            {apartments.length > 2 && (
+                              <Badge variant="secondary" className="text-xs">
+                                +{apartments.length - 2} más
+                              </Badge>
+                            )}
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex gap-2 justify-end">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleViewOwner(owner)}
+                          >
+                            Ver
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleEditOwner(owner)}
+                          >
+                            Editar
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          ) : (
+            <div className="text-center py-12">
+              <User className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+              <p className="text-gray-500">No se encontraron propietarios con los filtros seleccionados.</p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       {/* Owner Profile Dialog */}
       {selectedOwner && (
