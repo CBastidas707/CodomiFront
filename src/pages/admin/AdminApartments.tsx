@@ -6,9 +6,10 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { Plus, Search, Building, Users, DollarSign, Settings } from 'lucide-react';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { Plus, Search, Building, Users, DollarSign, Settings, MoreVertical, Edit, Eye, CreditCard } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
-import ApartmentCard from '@/components/ApartmentCard';
 import ApartmentForm from '@/components/ApartmentForm';
 import { ExtendedApartment, AliquotType } from '@/types/apartment';
 import { Owner } from '@/types/owner';
@@ -202,6 +203,11 @@ const AdminApartments: React.FC = () => {
     setShowApartmentForm(true);
   };
 
+  const handleViewPayments = (apartmentId: string) => {
+    // TODO: Navigate to financial management with apartment filter
+    console.log('Navigate to payments for apartment:', apartmentId);
+  };
+
   const handleSaveApartment = (apartmentData: ExtendedApartment) => {
     if (editingApartment) {
       setApartments(prev => prev.map(apt => 
@@ -220,10 +226,17 @@ const AdminApartments: React.FC = () => {
     setEditingApartment(null);
   };
 
-  const handleUpdateApartment = (updatedApartment: ExtendedApartment) => {
-    setApartments(prev => prev.map(apt => 
-      apt.id === updatedApartment.id ? updatedApartment : apt
-    ));
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case 'occupied':
+        return <Badge className="bg-green-100 text-green-800 border-green-300">Ocupado</Badge>;
+      case 'vacant':
+        return <Badge className="bg-blue-100 text-blue-800 border-blue-300">Vacante</Badge>;
+      case 'maintenance':
+        return <Badge className="bg-yellow-100 text-yellow-800 border-yellow-300">Mantenimiento</Badge>;
+      default:
+        return <Badge variant="secondary">{status}</Badge>;
+    }
   };
 
   const totalApartments = apartments.length;
@@ -238,7 +251,7 @@ const AdminApartments: React.FC = () => {
           <h1 className="text-3xl font-bold text-gray-900">Gestión de Apartamentos</h1>
           <p className="text-gray-600 mt-1">Administra todos los apartamentos de los edificios</p>
         </div>
-        <Button onClick={handleCreateApartment} className="bg-codomi-navy hover:bg-codomi-navy-dark">
+        <Button onClick={handleCreateApartment} className="bg-codomi-navy hover:bg-codomi-navy-dark w-full sm:w-auto">
           <Plus className="h-4 w-4 mr-2" />
           Agregar Apartamento
         </Button>
@@ -284,42 +297,44 @@ const AdminApartments: React.FC = () => {
       {/* Filters */}
       <Card>
         <CardContent className="p-4">
-          <div className="flex flex-col sm:flex-row gap-4">
-            <div className="flex-1">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                <Input
-                  placeholder="Buscar por número, edificio o propietario..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
-                />
+          <div className="flex flex-col gap-4">
+            <div className="flex flex-col sm:flex-row gap-4">
+              <div className="flex-1">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                  <Input
+                    placeholder="Buscar por número, edificio o propietario..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-10"
+                  />
+                </div>
               </div>
+              <Select value={selectedBuilding} onValueChange={setSelectedBuilding}>
+                <SelectTrigger className="w-full sm:w-48">
+                  <SelectValue placeholder="Filtrar por edificio" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos los edificios</SelectItem>
+                  {buildings.map(building => (
+                    <SelectItem key={building.id} value={building.id}>
+                      {building.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Select value={selectedStatus} onValueChange={setSelectedStatus}>
+                <SelectTrigger className="w-full sm:w-40">
+                  <SelectValue placeholder="Estado" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos</SelectItem>
+                  <SelectItem value="occupied">Ocupado</SelectItem>
+                  <SelectItem value="vacant">Vacante</SelectItem>
+                  <SelectItem value="maintenance">Mantenimiento</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
-            <Select value={selectedBuilding} onValueChange={setSelectedBuilding}>
-              <SelectTrigger className="w-full sm:w-48">
-                <SelectValue placeholder="Filtrar por edificio" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todos los edificios</SelectItem>
-                {buildings.map(building => (
-                  <SelectItem key={building.id} value={building.id}>
-                    {building.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Select value={selectedStatus} onValueChange={setSelectedStatus}>
-              <SelectTrigger className="w-full sm:w-40">
-                <SelectValue placeholder="Estado" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todos</SelectItem>
-                <SelectItem value="occupied">Ocupado</SelectItem>
-                <SelectItem value="vacant">Vacante</SelectItem>
-                <SelectItem value="maintenance">Mantenimiento</SelectItem>
-              </SelectContent>
-            </Select>
           </div>
         </CardContent>
       </Card>
@@ -351,17 +366,138 @@ const AdminApartments: React.FC = () => {
                   </AccordionTrigger>
                   <AccordionContent>
                     <div className="px-6 pb-4">
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {/* Mobile view - List */}
+                      <div className="block md:hidden space-y-3">
                         {buildingApartments.map(apartment => (
-                          <ApartmentCard
-                            key={apartment.id}
-                            apartment={apartment}
-                            aliquotTypes={mockAliquotTypes}
-                            owners={mockOwners}
-                            onEdit={handleEditApartment}
-                            onUpdate={handleUpdateApartment}
-                          />
+                          <Card key={apartment.id} className="p-4">
+                            <div className="flex items-start justify-between mb-3">
+                              <div>
+                                <h4 className="font-semibold">Apartamento {apartment.number}</h4>
+                                <p className="text-sm text-gray-600">Piso {apartment.floor}</p>
+                              </div>
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button variant="ghost" size="sm">
+                                    <MoreVertical className="h-4 w-4" />
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                  <DropdownMenuItem onClick={() => handleEditApartment(apartment)}>
+                                    <Edit className="h-4 w-4 mr-2" />
+                                    Editar
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem onClick={() => handleViewPayments(apartment.id)}>
+                                    <CreditCard className="h-4 w-4 mr-2" />
+                                    Ver Pagos
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            </div>
+                            <div className="space-y-2">
+                              <div className="flex items-center justify-between">
+                                <span className="text-sm text-gray-600">Estado:</span>
+                                {getStatusBadge(apartment.status)}
+                              </div>
+                              <div className="flex items-center justify-between">
+                                <span className="text-sm text-gray-600">Área:</span>
+                                <span className="text-sm">
+                                  {apartment.squareMeters} {apartment.measurementType === 'area' ? 'm²' : '%'}
+                                </span>
+                              </div>
+                              <div className="flex items-center justify-between">
+                                <span className="text-sm text-gray-600">Alícuota:</span>
+                                <span className="text-sm">{apartment.aliquotType?.name} ({apartment.aliquotType?.percentage}%)</span>
+                              </div>
+                              <div className="flex items-center justify-between">
+                                <span className="text-sm text-gray-600">Propietarios:</span>
+                                <span className="text-sm">{apartment.owners?.length || 0}</span>
+                              </div>
+                              <div className="flex items-center justify-between">
+                                <span className="text-sm text-gray-600">Cuota:</span>
+                                <span className="text-sm font-medium">Bs. {apartment.monthlyFee.toLocaleString()}</span>
+                              </div>
+                            </div>
+                          </Card>
                         ))}
+                      </div>
+
+                      {/* Desktop view - Table */}
+                      <div className="hidden md:block">
+                        <Table>
+                          <TableHeader>
+                            <TableRow>
+                              <TableHead>Apartamento</TableHead>
+                              <TableHead>Estado</TableHead>
+                              <TableHead>Área</TableHead>
+                              <TableHead>Alícuota</TableHead>
+                              <TableHead>Propietarios</TableHead>
+                              <TableHead>Cuota Mensual</TableHead>
+                              <TableHead className="w-[50px]"></TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {buildingApartments.map(apartment => (
+                              <TableRow key={apartment.id}>
+                                <TableCell>
+                                  <div>
+                                    <p className="font-medium">Apartamento {apartment.number}</p>
+                                    <p className="text-sm text-gray-600">Piso {apartment.floor}</p>
+                                  </div>
+                                </TableCell>
+                                <TableCell>
+                                  {getStatusBadge(apartment.status)}
+                                </TableCell>
+                                <TableCell>
+                                  {apartment.squareMeters ? 
+                                    `${apartment.squareMeters} ${apartment.measurementType === 'area' ? 'm²' : '%'}` 
+                                    : '-'
+                                  }
+                                </TableCell>
+                                <TableCell>
+                                  <div>
+                                    <p className="text-sm">{apartment.aliquotType?.name}</p>
+                                    <p className="text-xs text-gray-600">{apartment.aliquotType?.percentage}%</p>
+                                  </div>
+                                </TableCell>
+                                <TableCell>
+                                  <div className="flex flex-wrap gap-1">
+                                    {apartment.owners && apartment.owners.length > 0 ? (
+                                      apartment.owners.map(owner => (
+                                        <Badge key={owner.id} variant="outline" className="text-xs">
+                                          {owner.name.split(' ')[0]}
+                                        </Badge>
+                                      ))
+                                    ) : (
+                                      <span className="text-sm text-gray-500">Sin propietario</span>
+                                    )}
+                                  </div>
+                                </TableCell>
+                                <TableCell>
+                                  <span className="font-medium">Bs. {apartment.monthlyFee.toLocaleString()}</span>
+                                </TableCell>
+                                <TableCell>
+                                  <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                      <Button variant="ghost" size="sm">
+                                        <MoreVertical className="h-4 w-4" />
+                                      </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent align="end">
+                                      <DropdownMenuItem onClick={() => handleEditApartment(apartment)}>
+                                        <Edit className="h-4 w-4 mr-2" />
+                                        Editar
+                                      </DropdownMenuItem>
+                                      <DropdownMenuItem onClick={() => handleViewPayments(apartment.id)}>
+                                        <CreditCard className="h-4 w-4 mr-2" />
+                                        Ver Pagos
+                                      </DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                  </DropdownMenu>
+                                </TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
                       </div>
                     </div>
                   </AccordionContent>

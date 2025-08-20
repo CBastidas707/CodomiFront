@@ -8,8 +8,10 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Search, X, Plus, Unlink } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Search, X, Plus, Unlink, Building } from 'lucide-react';
 import { Owner, Apartment } from '@/types/owner';
+import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 
 interface OwnerFormProps {
@@ -26,6 +28,7 @@ const OwnerForm: React.FC<OwnerFormProps> = ({
   onSave
 }) => {
   const { toast } = useToast();
+  const { buildings } = useAuth();
   const [formData, setFormData] = useState({
     name: owner?.name || '',
     documentType: owner?.documentType || 'cedula' as 'cedula' | 'rif',
@@ -35,6 +38,8 @@ const OwnerForm: React.FC<OwnerFormProps> = ({
   });
   const [linkedApartments, setLinkedApartments] = useState<Apartment[]>([]);
   const [apartmentSearch, setApartmentSearch] = useState('');
+  const [selectedBuilding, setSelectedBuilding] = useState<string>('all');
+  const [searchMode, setSearchMode] = useState<'free' | 'structured'>('free');
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [showUnlinkConfirm, setShowUnlinkConfirm] = useState(false);
   const [showSaveConfirm, setShowSaveConfirm] = useState(false);
@@ -131,18 +136,43 @@ const OwnerForm: React.FC<OwnerFormProps> = ({
     setShowUnlinkConfirm(false);
   };
 
-  const filteredApartments = availableApartments.filter(apt => 
-    !linkedApartments.find(linked => linked.id === apt.id) &&
-    (apt.number.toLowerCase().includes(apartmentSearch.toLowerCase()) ||
-     apt.buildingName.toLowerCase().includes(apartmentSearch.toLowerCase()))
-  );
+  // Filter apartments based on search mode
+  const getFilteredApartments = () => {
+    let filtered = availableApartments.filter(apt => 
+      !linkedApartments.find(linked => linked.id === apt.id)
+    );
 
+    if (searchMode === 'structured') {
+      // First filter by building if selected
+      if (selectedBuilding !== 'all') {
+        filtered = filtered.filter(apt => apt.buildingId === selectedBuilding);
+      }
+      // Then by apartment search if any
+      if (apartmentSearch) {
+        filtered = filtered.filter(apt =>
+          apt.number.toLowerCase().includes(apartmentSearch.toLowerCase())
+        );
+      }
+    } else {
+      // Free search mode - search across both building and apartment
+      if (apartmentSearch) {
+        filtered = filtered.filter(apt =>
+          apt.number.toLowerCase().includes(apartmentSearch.toLowerCase()) ||
+          apt.buildingName.toLowerCase().includes(apartmentSearch.toLowerCase())
+        );
+      }
+    }
+
+    return filtered;
+  };
+
+  const filteredApartments = getFilteredApartments();
   const apartmentToUnlinkData = linkedApartments.find(apt => apt.id === apartmentToUnlink);
 
   return (
     <>
       <Dialog open={true} onOpenChange={() => onClose()}>
-        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
               {owner ? 'Editar Propietario' : 'Crear Nuevo Propietario'}
@@ -238,26 +268,32 @@ const OwnerForm: React.FC<OwnerFormProps> = ({
               <CardHeader>
                 <CardTitle className="text-lg">Gestión de Apartamentos</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="space-y-6">
                 {/* Linked Apartments */}
                 <div>
-                  <Label className="text-sm font-medium mb-2 block">
+                  <Label className="text-sm font-medium mb-3 block">
                     Apartamentos Vinculados ({linkedApartments.length})
                   </Label>
                   {linkedApartments.length > 0 ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                    <div className="space-y-2">
                       {linkedApartments.map(apartment => (
-                        <div key={apartment.id} className="flex items-center justify-between p-2 border rounded">
+                        <div key={apartment.id} className="flex items-center justify-between p-3 border rounded-lg bg-gray-50">
                           <div className="flex-1">
-                            <p className="text-sm font-medium">{apartment.buildingName}</p>
-                            <p className="text-xs text-gray-600">Apartamento {apartment.number}</p>
+                            <div className="flex items-center gap-2">
+                              <Building className="h-4 w-4 text-gray-500" />
+                              <span className="font-medium">{apartment.buildingName}</span>
+                              <Badge variant="outline">Apt. {apartment.number}</Badge>
+                            </div>
+                            <p className="text-sm text-gray-600 mt-1">
+                              Piso {apartment.floor} • Bs. {apartment.monthlyFee.toLocaleString()}
+                            </p>
                           </div>
                           <Button
                             type="button"
                             variant="ghost"
                             size="sm"
                             onClick={() => handleUnlinkApartment(apartment.id)}
-                            className="text-red-500 hover:text-red-700"
+                            className="text-red-500 hover:text-red-700 hover:bg-red-50"
                           >
                             <Unlink className="h-4 w-4" />
                           </Button>
@@ -271,36 +307,88 @@ const OwnerForm: React.FC<OwnerFormProps> = ({
 
                 {/* Search and Link Apartments */}
                 <div>
-                  <Label className="text-sm font-medium mb-2 block">
+                  <Label className="text-sm font-medium mb-3 block">
                     Buscar y Vincular Apartamentos
                   </Label>
-                  <div className="relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                    <Input
-                      placeholder="Buscar por número de apartamento o edificio..."
-                      value={apartmentSearch}
-                      onChange={(e) => setApartmentSearch(e.target.value)}
-                      className="pl-10"
-                    />
-                  </div>
-                  {apartmentSearch && (
-                    <div className="mt-2 max-h-32 overflow-y-auto border rounded">
+                  
+                  {/* Search Mode Tabs */}
+                  <Tabs value={searchMode} onValueChange={(value: 'free' | 'structured') => {
+                    setSearchMode(value);
+                    setApartmentSearch('');
+                    setSelectedBuilding('all');
+                  }} className="w-full">
+                    <TabsList className="grid w-full grid-cols-2 mb-4">
+                      <TabsTrigger value="free">Búsqueda Libre</TabsTrigger>
+                      <TabsTrigger value="structured">Por Edificio</TabsTrigger>
+                    </TabsList>
+                    
+                    <TabsContent value="free" className="space-y-3">
+                      <div className="relative">
+                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                        <Input
+                          placeholder="Buscar por edificio o apartamento..."
+                          value={apartmentSearch}
+                          onChange={(e) => setApartmentSearch(e.target.value)}
+                          className="pl-10"
+                        />
+                      </div>
+                    </TabsContent>
+                    
+                    <TabsContent value="structured" className="space-y-3">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <Select value={selectedBuilding} onValueChange={setSelectedBuilding}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Seleccionar edificio" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="all">Todos los edificios</SelectItem>
+                            {buildings.map(building => (
+                              <SelectItem key={building.id} value={building.id}>
+                                {building.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <div className="relative">
+                          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                          <Input
+                            placeholder="Buscar apartamento..."
+                            value={apartmentSearch}
+                            onChange={(e) => setApartmentSearch(e.target.value)}
+                            className="pl-10"
+                          />
+                        </div>
+                      </div>
+                    </TabsContent>
+                  </Tabs>
+
+                  {/* Search Results */}
+                  {(apartmentSearch || selectedBuilding !== 'all') && (
+                    <div className="mt-3 max-h-48 overflow-y-auto border rounded-lg bg-white">
                       {filteredApartments.length > 0 ? (
-                        filteredApartments.map(apartment => (
-                          <div
-                            key={apartment.id}
-                            className="flex items-center justify-between p-2 hover:bg-gray-50 cursor-pointer"
-                            onClick={() => handleLinkApartment(apartment)}
-                          >
-                            <div>
-                              <p className="text-sm font-medium">{apartment.buildingName}</p>
-                              <p className="text-xs text-gray-600">Apartamento {apartment.number}</p>
+                        <div className="divide-y">
+                          {filteredApartments.map(apartment => (
+                            <div
+                              key={apartment.id}
+                              className="flex items-center justify-between p-3 hover:bg-gray-50 cursor-pointer transition-colors"
+                              onClick={() => handleLinkApartment(apartment)}
+                            >
+                              <div className="flex-1">
+                                <div className="flex items-center gap-2">
+                                  <Building className="h-4 w-4 text-gray-500" />
+                                  <span className="font-medium">{apartment.buildingName}</span>
+                                  <Badge variant="outline">Apt. {apartment.number}</Badge>
+                                </div>
+                                <p className="text-sm text-gray-600 mt-1">
+                                  Piso {apartment.floor} • {apartment.status === 'occupied' ? 'Ocupado' : apartment.status === 'vacant' ? 'Vacante' : 'Mantenimiento'}
+                                </p>
+                              </div>
+                              <Plus className="h-4 w-4 text-green-500" />
                             </div>
-                            <Plus className="h-4 w-4 text-green-500" />
-                          </div>
-                        ))
+                          ))}
+                        </div>
                       ) : (
-                        <p className="p-2 text-sm text-gray-500">No se encontraron apartamentos</p>
+                        <p className="p-4 text-sm text-gray-500 text-center">No se encontraron apartamentos disponibles</p>
                       )}
                     </div>
                   )}
