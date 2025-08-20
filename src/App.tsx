@@ -19,6 +19,7 @@ import JuntaAnnouncements from "./pages/junta/JuntaAnnouncements";
 import JuntaCommunication from "./pages/junta/JuntaCommunication";
 import NotFound from "./pages/NotFound";
 import AdminOwners from "./pages/admin/AdminOwners";
+import AdminApartments from "./pages/admin/AdminApartments";
 
 const queryClient = new QueryClient();
 
@@ -69,6 +70,11 @@ const AppRoutes = () => {
         <Route path="/admin/owners" element={
           <ProtectedRoute allowedRoles={['admin']}>
             <AdminOwners />
+          </ProtectedRoute>
+        } />
+        <Route path="/admin/apartments" element={
+          <ProtectedRoute allowedRoles={['admin']}>
+            <AdminApartments />
           </ProtectedRoute>
         } />
         <Route path="/admin/announcements" element={

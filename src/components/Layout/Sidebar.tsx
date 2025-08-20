@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -9,7 +8,8 @@ import {
   MessageSquare,
   Plus,
   Search,
-  Megaphone
+  Megaphone,
+  Building2
 } from 'lucide-react';
 
 const Sidebar: React.FC = () => {
@@ -18,6 +18,7 @@ const Sidebar: React.FC = () => {
   const adminMenuItems = [
     { icon: Home, label: 'Panel de Control', path: '/admin' },
     { icon: User, label: 'Gestión de Propietarios', path: '/admin/owners' },
+    { icon: Building2, label: 'Gestión de Apartamentos', path: '/admin/apartments' },
     { icon: Calendar, label: 'Gestión Financiera', path: '/admin/finance' },
     { icon: Search, label: 'Gestión de Recibos', path: '/admin/receipts' },
     { icon: Plus, label: 'Análisis de Datos', path: '/admin/analytics' },
