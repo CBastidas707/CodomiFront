@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
@@ -182,26 +181,27 @@ const ApartmentForm: React.FC<ApartmentFormProps> = ({
                     />
                   </div>
 
-                  <div>
-                    <Label className="text-sm font-medium">Estado *</Label>
+                  {/* Improved responsive Status field */}
+                  <div className="w-full">
+                    <Label className="text-sm font-medium block mb-2">Estado *</Label>
                     <RadioGroup 
                       value={formData.status} 
                       onValueChange={(value: 'occupied' | 'vacant' | 'maintenance') => 
                         setFormData({ ...formData, status: value })
                       }
-                      className="flex flex-row space-x-4 mt-2"
+                      className="flex flex-col sm:flex-row sm:space-x-4 space-y-2 sm:space-y-0"
                     >
                       <div className="flex items-center space-x-2">
                         <RadioGroupItem value="occupied" id="occupied" />
-                        <Label htmlFor="occupied" className="text-sm">Ocupado</Label>
+                        <Label htmlFor="occupied" className="text-sm cursor-pointer">Ocupado</Label>
                       </div>
                       <div className="flex items-center space-x-2">
                         <RadioGroupItem value="vacant" id="vacant" />
-                        <Label htmlFor="vacant" className="text-sm">Vacante</Label>
+                        <Label htmlFor="vacant" className="text-sm cursor-pointer">Vacante</Label>
                       </div>
                       <div className="flex items-center space-x-2">
                         <RadioGroupItem value="maintenance" id="maintenance" />
-                        <Label htmlFor="maintenance" className="text-sm">Mantenimiento</Label>
+                        <Label htmlFor="maintenance" className="text-sm cursor-pointer">Mantenimiento</Label>
                       </div>
                     </RadioGroup>
                   </div>
