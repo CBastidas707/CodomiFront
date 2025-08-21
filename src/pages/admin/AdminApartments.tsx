@@ -265,13 +265,13 @@ const AdminApartments: React.FC = () => {
     const extendedApartmentData: ExtendedApartment = {
       ...apartmentData,
       buildingName: buildings.find(b => b.id === apartmentData.buildingId)?.name || 'Edificio Desconocido',
-      squareMeters: Number(apartmentData.squareMeters) || 0,
+      squareMeters: apartmentData.squareMeters ? Number(apartmentData.squareMeters) : 0,
       measurementType: 'area' as const,
       aliquotTypeId: apartmentData.aliquotTypeId || '1',
       aliquotType: mockAliquotTypes.find(type => type.id === (apartmentData.aliquotTypeId || '1')),
       ownerIds: [],
       owners: [],
-      monthlyFee: Number(apartmentData.monthlyFee) || 0,
+      monthlyFee: apartmentData.monthlyFee ? Number(apartmentData.monthlyFee) : 0,
       createdAt: apartmentData.createdAt || new Date().toISOString(),
       updatedAt: new Date().toISOString()
     };

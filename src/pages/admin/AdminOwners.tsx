@@ -159,7 +159,8 @@ const AdminOwners: React.FC = () => {
       setOwners(prev => prev.map(owner => owner.id === editingOwner.id ? { ...owner, ...ownerData } : owner));
     } else {
       // Create new owner
-      setOwners(prev => [...prev, { ...ownerData, id: String(Date.now()) }]);
+      const newOwner = { ...ownerData, id: String(Date.now()) };
+      setOwners(prev => [...prev, newOwner]);
     }
     setShowOwnerForm(false);
     setEditingOwner(null);
