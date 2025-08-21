@@ -1,5 +1,3 @@
-
-
 import React, { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -266,13 +264,13 @@ const AdminApartments: React.FC = () => {
     const extendedApartmentData: ExtendedApartment = {
       ...apartmentData,
       buildingName: buildings.find(b => b.id === apartmentData.buildingId)?.name || 'Edificio Desconocido',
-      squareMeters: Number(apartmentData.squareMeters) || 0,
+      squareMeters: typeof apartmentData.squareMeters === 'string' ? parseFloat(apartmentData.squareMeters) || 0 : (apartmentData.squareMeters as number) || 0,
       measurementType: 'area' as const,
       aliquotTypeId: apartmentData.aliquotTypeId || '1',
       aliquotType: mockAliquotTypes.find(type => type.id === (apartmentData.aliquotTypeId || '1')),
       ownerIds: [],
       owners: [],
-      monthlyFee: Number(apartmentData.monthlyFee) || 0,
+      monthlyFee: typeof apartmentData.monthlyFee === 'string' ? parseFloat(apartmentData.monthlyFee) || 0 : (apartmentData.monthlyFee as number) || 0,
       createdAt: apartmentData.createdAt || new Date().toISOString(),
       updatedAt: new Date().toISOString()
     };
