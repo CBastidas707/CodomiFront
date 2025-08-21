@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -265,13 +264,13 @@ const AdminApartments: React.FC = () => {
     const extendedApartmentData: ExtendedApartment = {
       ...apartmentData,
       buildingName: buildings.find(b => b.id === apartmentData.buildingId)?.name || 'Edificio Desconocido',
-      squareMeters: apartmentData.squareMeters ? Number(apartmentData.squareMeters) : 0,
+      squareMeters: apartmentData.squareMeters ? parseFloat(String(apartmentData.squareMeters)) : 0,
       measurementType: 'area' as const,
       aliquotTypeId: apartmentData.aliquotTypeId || '1',
       aliquotType: mockAliquotTypes.find(type => type.id === (apartmentData.aliquotTypeId || '1')),
       ownerIds: [],
       owners: [],
-      monthlyFee: apartmentData.monthlyFee ? Number(apartmentData.monthlyFee) : 0,
+      monthlyFee: apartmentData.monthlyFee ? parseFloat(String(apartmentData.monthlyFee)) : 0,
       createdAt: apartmentData.createdAt || new Date().toISOString(),
       updatedAt: new Date().toISOString()
     };
@@ -311,100 +310,98 @@ const AdminApartments: React.FC = () => {
 
   return (
     <div className="min-h-screen w-full bg-background">
-      <div className="w-full max-w-none p-3 sm:p-4 md:p-6 space-y-4 md:space-y-6">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4">
-          <div className="flex-1 min-w-0">
-            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground">
+      <div className="container mx-auto px-4 py-6 space-y-6">
+        {/* Header - Improved responsivity */}
+        <div className="flex flex-col space-y-4 lg:flex-row lg:items-center lg:justify-between lg:space-y-0">
+          <div className="space-y-2">
+            <h1 className="text-2xl font-bold tracking-tight lg:text-3xl">
               Gestión de Apartamentos
             </h1>
-            <p className="text-xs sm:text-sm md:text-base text-muted-foreground mt-1">
+            <p className="text-sm text-muted-foreground lg:text-base">
               Administra todos los apartamentos
               {selectedBuilding && (
-                <span className="block sm:inline sm:ml-2 text-primary font-medium">
+                <span className="block text-primary font-medium lg:inline lg:ml-2">
                   • {selectedBuilding.name}
                 </span>
               )}
             </p>
             {!selectedBuilding && (
-              <p className="text-xs sm:text-sm text-yellow-600 mt-1 font-medium">
+              <p className="text-sm text-yellow-600 font-medium">
                 ⚠️ Selecciona un edificio para ver sus apartamentos específicos
               </p>
             )}
           </div>
           <Button 
             onClick={handleCreateApartment} 
-            className="w-full sm:w-auto bg-primary hover:bg-primary/90"
-            size="sm"
+            className="w-full bg-primary hover:bg-primary/90 lg:w-auto"
           >
             <Plus className="h-4 w-4 mr-2" />
             Agregar Apartamento
           </Button>
         </div>
 
-        {/* Statistics */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+        {/* Statistics - Improved grid layout */}
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <Card>
-            <CardContent className="p-3 sm:p-4">
+            <CardContent className="p-6">
               <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-xs sm:text-sm font-medium text-muted-foreground">
+                <div className="space-y-1">
+                  <p className="text-sm font-medium text-muted-foreground">
                     Total Apartamentos
                     {selectedBuilding && (
-                      <span className="block text-xs text-muted-foreground">
+                      <span className="block text-xs">
                         en {selectedBuilding.name}
                       </span>
                     )}
                   </p>
-                  <p className="text-xl sm:text-2xl font-bold text-foreground">{totalApartments}</p>
+                  <p className="text-2xl font-bold">{totalApartments}</p>
                 </div>
-                <Building className="h-6 w-6 sm:h-8 sm:w-8 text-primary" />
+                <Building className="h-8 w-8 text-primary" />
               </div>
             </CardContent>
           </Card>
           <Card>
-            <CardContent className="p-3 sm:p-4">
+            <CardContent className="p-6">
               <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-xs sm:text-sm font-medium text-muted-foreground">Ocupados</p>
-                  <p className="text-xl sm:text-2xl font-bold text-green-600">{occupiedApartments}</p>
+                <div className="space-y-1">
+                  <p className="text-sm font-medium text-muted-foreground">Ocupados</p>
+                  <p className="text-2xl font-bold text-green-600">{occupiedApartments}</p>
                 </div>
-                <Users className="h-6 w-6 sm:h-8 sm:w-8 text-green-600" />
+                <Users className="h-8 w-8 text-green-600" />
               </div>
             </CardContent>
           </Card>
-          <Card>
-            <CardContent className="p-3 sm:p-4">
+          <Card className="sm:col-span-2 lg:col-span-1">
+            <CardContent className="p-6">
               <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-xs sm:text-sm font-medium text-muted-foreground">Disponibles</p>
-                  <p className="text-xl sm:text-2xl font-bold text-blue-600">{vacantApartments}</p>
+                <div className="space-y-1">
+                  <p className="text-sm font-medium text-muted-foreground">Disponibles</p>
+                  <p className="text-2xl font-bold text-blue-600">{vacantApartments}</p>
                 </div>
-                <DollarSign className="h-6 w-6 sm:h-8 sm:w-8 text-blue-600" />
+                <DollarSign className="h-8 w-8 text-blue-600" />
               </div>
             </CardContent>
           </Card>
         </div>
 
-        {/* Filters */}
-        <Card className="w-full">
-          <CardContent className="p-3 sm:p-4">
-            <div className="flex flex-col gap-3 sm:gap-4">
-              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
-                <div className="flex-1">
-                  <div className="relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-                    <Input
-                      placeholder="Buscar por número o propietario..."
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      className="pl-10"
-                      size="sm"
-                    />
-                  </div>
+        {/* Filters - Better responsive layout */}
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex flex-col space-y-4 lg:flex-row lg:items-center lg:space-y-0 lg:space-x-4">
+              <div className="flex-1">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                  <Input
+                    placeholder="Buscar por número o propietario..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-10"
+                  />
                 </div>
+              </div>
+              <div className="w-full lg:w-48">
                 <Select value={selectedStatus} onValueChange={setSelectedStatus}>
-                  <SelectTrigger className="w-full sm:w-40">
+                  <SelectTrigger>
                     <SelectValue placeholder="Estado" />
                   </SelectTrigger>
                   <SelectContent>
@@ -419,20 +416,20 @@ const AdminApartments: React.FC = () => {
           </CardContent>
         </Card>
 
-        {/* Apartments by Building */}
+        {/* Apartments by Building - Enhanced responsive design */}
         <div className="space-y-4">
           {Object.entries(apartmentsByBuilding).length === 0 ? (
             <Card>
-              <CardContent className="p-6 sm:p-8 text-center">
+              <CardContent className="p-8 text-center">
                 <Building className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <p className="text-muted-foreground text-sm sm:text-base">
+                <p className="text-muted-foreground">
                   {selectedBuilding 
                     ? `No se encontraron apartamentos en ${selectedBuilding.name} con los filtros aplicados`
                     : "No se encontraron apartamentos con los filtros aplicados"
                   }
                 </p>
                 {!selectedBuilding && (
-                  <p className="text-muted-foreground text-xs sm:text-sm mt-2">
+                  <p className="text-muted-foreground text-sm mt-2">
                     Selecciona un edificio específico para ver sus apartamentos.
                   </p>
                 )}
@@ -443,29 +440,29 @@ const AdminApartments: React.FC = () => {
               {Object.entries(apartmentsByBuilding).map(([buildingName, buildingApartments]) => (
                 <AccordionItem key={buildingName} value={buildingName}>
                   <Card>
-                    <AccordionTrigger className="px-4 sm:px-6 py-3 sm:py-4 hover:no-underline">
+                    <AccordionTrigger className="px-6 py-4 hover:no-underline">
                       <div className="flex items-center justify-between w-full mr-4">
                         <div className="flex items-center gap-3">
-                          <Building className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
-                          <span className="text-sm sm:text-lg font-semibold">{buildingName}</span>
+                          <Building className="h-5 w-5 text-primary" />
+                          <span className="text-lg font-semibold">{buildingName}</span>
                         </div>
-                        <Badge variant="secondary" className="text-xs">
+                        <Badge variant="secondary">
                           {buildingApartments.length} apartamentos
                         </Badge>
                       </div>
                     </AccordionTrigger>
                     <AccordionContent>
-                      <div className="px-4 sm:px-6 pb-4">
-                        {/* Mobile view - List */}
-                        <div className="block md:hidden space-y-3">
+                      <div className="px-6 pb-4">
+                        {/* Mobile Cards - Better spacing and layout */}
+                        <div className="grid gap-4 md:hidden">
                           {buildingApartments.map(apartment => (
-                            <Card key={apartment.id} className="p-3 sm:p-4">
+                            <Card key={apartment.id} className="p-4">
                               <div className="flex items-start justify-between mb-3">
                                 <div>
-                                  <h4 className="font-semibold text-sm sm:text-base">
+                                  <h4 className="font-semibold">
                                     Apartamento {apartment.number}
                                   </h4>
-                                  <p className="text-xs sm:text-sm text-muted-foreground">
+                                  <p className="text-sm text-muted-foreground">
                                     Piso {apartment.floor}
                                   </p>
                                 </div>
@@ -487,115 +484,127 @@ const AdminApartments: React.FC = () => {
                                   </DropdownMenuContent>
                                 </DropdownMenu>
                               </div>
-                              <div className="space-y-2">
-                                <div className="flex items-center justify-between">
-                                  <span className="text-xs sm:text-sm text-muted-foreground">Estado:</span>
-                                  {getStatusBadge(apartment.status)}
+                              <div className="grid grid-cols-2 gap-2 text-sm">
+                                <div className="flex flex-col">
+                                  <span className="text-muted-foreground">Estado</span>
+                                  <div className="mt-1">{getStatusBadge(apartment.status)}</div>
                                 </div>
-                                <div className="flex items-center justify-between">
-                                  <span className="text-xs sm:text-sm text-muted-foreground">Área:</span>
-                                  <span className="text-xs sm:text-sm">
+                                <div className="flex flex-col">
+                                  <span className="text-muted-foreground">Área</span>
+                                  <span className="mt-1">
                                     {apartment.squareMeters} {apartment.measurementType === 'area' ? 'm²' : '%'}
                                   </span>
                                 </div>
-                                <div className="flex items-center justify-between">
-                                  <span className="text-xs sm:text-sm text-muted-foreground">Alícuota:</span>
-                                  <span className="text-xs sm:text-sm">
+                                <div className="flex flex-col">
+                                  <span className="text-muted-foreground">Alícuota</span>
+                                  <span className="mt-1">
                                     {apartment.aliquotType?.name} ({apartment.aliquotType?.percentage}%)
                                   </span>
                                 </div>
-                                <div className="flex items-center justify-between">
-                                  <span className="text-xs sm:text-sm text-muted-foreground">Propietarios:</span>
-                                  <span className="text-xs sm:text-sm">{apartment.owners?.length || 0}</span>
-                                </div>
-                                <div className="flex items-center justify-between">
-                                  <span className="text-xs sm:text-sm text-muted-foreground">Cuota:</span>
-                                  <span className="text-xs sm:text-sm font-medium">
+                                <div className="flex flex-col">
+                                  <span className="text-muted-foreground">Cuota</span>
+                                  <span className="mt-1 font-medium">
                                     Bs. {apartment.monthlyFee.toLocaleString()}
                                   </span>
+                                </div>
+                                <div className="col-span-2 flex flex-col">
+                                  <span className="text-muted-foreground">Propietarios</span>
+                                  <div className="mt-1 flex flex-wrap gap-1">
+                                    {apartment.owners && apartment.owners.length > 0 ? (
+                                      apartment.owners.map(owner => (
+                                        <Badge key={owner.id} variant="outline" className="text-xs">
+                                          {owner.name.split(' ')[0]}
+                                        </Badge>
+                                      ))
+                                    ) : (
+                                      <span className="text-muted-foreground">Sin propietario</span>
+                                    )}
+                                  </div>
                                 </div>
                               </div>
                             </Card>
                           ))}
                         </div>
 
-                        {/* Desktop view - Table */}
-                        <div className="hidden md:block overflow-x-auto">
-                          <Table>
-                            <TableHeader>
-                              <TableRow>
-                                <TableHead>Apartamento</TableHead>
-                                <TableHead>Estado</TableHead>
-                                <TableHead>Área</TableHead>
-                                <TableHead>Alícuota</TableHead>
-                                <TableHead>Propietarios</TableHead>
-                                <TableHead>Cuota Mensual</TableHead>
-                                <TableHead className="w-[50px]"></TableHead>
-                              </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                              {buildingApartments.map(apartment => (
-                                <TableRow key={apartment.id}>
-                                  <TableCell>
-                                    <div>
-                                      <p className="font-medium">Apartamento {apartment.number}</p>
-                                      <p className="text-sm text-muted-foreground">Piso {apartment.floor}</p>
-                                    </div>
-                                  </TableCell>
-                                  <TableCell>
-                                    {getStatusBadge(apartment.status)}
-                                  </TableCell>
-                                  <TableCell>
-                                    {apartment.squareMeters ? 
-                                      `${apartment.squareMeters} ${apartment.measurementType === 'area' ? 'm²' : '%'}` 
-                                      : '-'
-                                    }
-                                  </TableCell>
-                                  <TableCell>
-                                    <div>
-                                      <p className="text-sm">{apartment.aliquotType?.name}</p>
-                                      <p className="text-xs text-muted-foreground">{apartment.aliquotType?.percentage}%</p>
-                                    </div>
-                                  </TableCell>
-                                  <TableCell>
-                                    <div className="flex flex-wrap gap-1">
-                                      {apartment.owners && apartment.owners.length > 0 ? (
-                                        apartment.owners.map(owner => (
-                                          <Badge key={owner.id} variant="outline" className="text-xs">
-                                            {owner.name.split(' ')[0]}
-                                          </Badge>
-                                        ))
-                                      ) : (
-                                        <span className="text-sm text-muted-foreground">Sin propietario</span>
-                                      )}
-                                    </div>
-                                  </TableCell>
-                                  <TableCell>
-                                    <span className="font-medium">Bs. {apartment.monthlyFee.toLocaleString()}</span>
-                                  </TableCell>
-                                  <TableCell>
-                                    <DropdownMenu>
-                                      <DropdownMenuTrigger asChild>
-                                        <Button variant="ghost" size="sm">
-                                          <MoreVertical className="h-4 w-4" />
-                                        </Button>
-                                      </DropdownMenuTrigger>
-                                      <DropdownMenuContent align="end">
-                                        <DropdownMenuItem onClick={() => handleEditApartment(apartment)}>
-                                          <Edit className="h-4 w-4 mr-2" />
-                                          Editar
-                                        </DropdownMenuItem>
-                                        <DropdownMenuItem onClick={() => handleViewPayments(apartment.id)}>
-                                          <CreditCard className="h-4 w-4 mr-2" />
-                                          Ver Pagos
-                                        </DropdownMenuItem>
-                                      </DropdownMenuContent>
-                                    </DropdownMenu>
-                                  </TableCell>
+                        {/* Desktop Table - Responsive overflow */}
+                        <div className="hidden md:block">
+                          <div className="overflow-x-auto">
+                            <Table>
+                              <TableHeader>
+                                <TableRow>
+                                  <TableHead className="min-w-[120px]">Apartamento</TableHead>
+                                  <TableHead className="min-w-[100px]">Estado</TableHead>
+                                  <TableHead className="min-w-[80px]">Área</TableHead>
+                                  <TableHead className="min-w-[120px]">Alícuota</TableHead>
+                                  <TableHead className="min-w-[150px]">Propietarios</TableHead>
+                                  <TableHead className="min-w-[120px]">Cuota Mensual</TableHead>
+                                  <TableHead className="w-[50px]"></TableHead>
                                 </TableRow>
-                              ))}
-                            </TableBody>
-                          </Table>
+                              </TableHeader>
+                              <TableBody>
+                                {buildingApartments.map(apartment => (
+                                  <TableRow key={apartment.id}>
+                                    <TableCell>
+                                      <div>
+                                        <p className="font-medium">Apartamento {apartment.number}</p>
+                                        <p className="text-sm text-muted-foreground">Piso {apartment.floor}</p>
+                                      </div>
+                                    </TableCell>
+                                    <TableCell>
+                                      {getStatusBadge(apartment.status)}
+                                    </TableCell>
+                                    <TableCell>
+                                      {apartment.squareMeters ? 
+                                        `${apartment.squareMeters} ${apartment.measurementType === 'area' ? 'm²' : '%'}` 
+                                        : '-'
+                                      }
+                                    </TableCell>
+                                    <TableCell>
+                                      <div>
+                                        <p className="text-sm">{apartment.aliquotType?.name}</p>
+                                        <p className="text-xs text-muted-foreground">{apartment.aliquotType?.percentage}%</p>
+                                      </div>
+                                    </TableCell>
+                                    <TableCell>
+                                      <div className="flex flex-wrap gap-1">
+                                        {apartment.owners && apartment.owners.length > 0 ? (
+                                          apartment.owners.map(owner => (
+                                            <Badge key={owner.id} variant="outline" className="text-xs">
+                                              {owner.name.split(' ')[0]}
+                                            </Badge>
+                                          ))
+                                        ) : (
+                                          <span className="text-sm text-muted-foreground">Sin propietario</span>
+                                        )}
+                                      </div>
+                                    </TableCell>
+                                    <TableCell>
+                                      <span className="font-medium">Bs. {apartment.monthlyFee.toLocaleString()}</span>
+                                    </TableCell>
+                                    <TableCell>
+                                      <DropdownMenu>
+                                        <DropdownMenuTrigger asChild>
+                                          <Button variant="ghost" size="sm">
+                                            <MoreVertical className="h-4 w-4" />
+                                          </Button>
+                                        </DropdownMenuTrigger>
+                                        <DropdownMenuContent align="end">
+                                          <DropdownMenuItem onClick={() => handleEditApartment(apartment)}>
+                                            <Edit className="h-4 w-4 mr-2" />
+                                            Editar
+                                          </DropdownMenuItem>
+                                          <DropdownMenuItem onClick={() => handleViewPayments(apartment.id)}>
+                                            <CreditCard className="h-4 w-4 mr-2" />
+                                            Ver Pagos
+                                          </DropdownMenuItem>
+                                        </DropdownMenuContent>
+                                      </DropdownMenu>
+                                    </TableCell>
+                                  </TableRow>
+                                ))}
+                              </TableBody>
+                            </Table>
+                          </div>
                         </div>
                       </div>
                     </AccordionContent>

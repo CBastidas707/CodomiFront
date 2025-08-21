@@ -1,14 +1,12 @@
 
 import React, { useState, useMemo } from 'react';
-import { Plus, Search, Filter, User, Phone, Mail } from 'lucide-react';
+import { Plus, Search, User, Phone, Mail } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { MoreVertical, Edit, Building } from 'lucide-react';
+import { MoreVertical, Edit } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import OwnerForm from '@/components/OwnerForm';
 import { Owner, Apartment } from '@/types/owner';
@@ -158,8 +156,13 @@ const AdminOwners: React.FC = () => {
       // Update existing owner
       setOwners(prev => prev.map(owner => owner.id === editingOwner.id ? { ...owner, ...ownerData } : owner));
     } else {
-      // Create new owner
-      const newOwner = { ...ownerData, id: String(Date.now()) };
+      // Create new owner with proper ID conversion
+      const newOwner: Owner = { 
+        ...ownerData, 
+        id: Date.now().toString(),
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
       setOwners(prev => [...prev, newOwner]);
     }
     setShowOwnerForm(false);
@@ -168,11 +171,11 @@ const AdminOwners: React.FC = () => {
 
   // Filter owners based on search term and selected building
   const filteredOwners = useMemo(() => {
-    let owners = [...mockOwners];
+    let filteredOwners = [...owners];
     
     // Filter by search term
     if (searchTerm) {
-      owners = owners.filter(owner => 
+      filteredOwners = filteredOwners.filter(owner => 
         owner.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         owner.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         owner.documentNumber.toLowerCase().includes(searchTerm.toLowerCase())
@@ -185,124 +188,180 @@ const AdminOwners: React.FC = () => {
         mockApartments
           .filter(apt => apt.buildingId === selectedBuilding.id && apt.ownerId)
           .map(apt => apt.ownerId)
-          .filter((id): id is string => typeof id === 'string')
+          .filter((id): id is string => id !== undefined)
       );
-      owners = owners.filter(owner => ownerIdsInBuilding.has(owner.id));
+      filteredOwners = filteredOwners.filter(owner => ownerIdsInBuilding.has(owner.id));
     }
 
-    return owners;
-  }, [searchTerm, selectedBuilding]);
+    return filteredOwners;
+  }, [searchTerm, selectedBuilding, owners]);
 
   return (
     <div className="min-h-screen w-full bg-background">
-      <div className="w-full max-w-none p-3 sm:p-4 md:p-6 space-y-4 md:space-y-6">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4">
-          <div className="flex-1 min-w-0">
-            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground">
+      <div className="container mx-auto px-4 py-6 space-y-6">
+        {/* Header - Improved responsivity */}
+        <div className="flex flex-col space-y-4 lg:flex-row lg:items-center lg:justify-between lg:space-y-0">
+          <div className="space-y-2">
+            <h1 className="text-2xl font-bold tracking-tight lg:text-3xl">
               Gestión de Propietarios
             </h1>
-            <p className="text-xs sm:text-sm md:text-base text-muted-foreground mt-1">
+            <p className="text-sm text-muted-foreground lg:text-base">
               Administra todos los propietarios
               {selectedBuilding && (
-                <span className="block sm:inline sm:ml-2 text-primary font-medium">
+                <span className="block text-primary font-medium lg:inline lg:ml-2">
                   • {selectedBuilding.name}
                 </span>
               )}
             </p>
             {!selectedBuilding && (
-              <p className="text-xs sm:text-sm text-yellow-600 mt-1 font-medium">
+              <p className="text-sm text-yellow-600 font-medium">
                 ⚠️ Selecciona un edificio para ver sus propietarios específicos
               </p>
             )}
           </div>
           <Button 
             onClick={handleCreateOwner} 
-            className="w-full sm:w-auto bg-primary hover:bg-primary/90"
-            size="sm"
+            className="w-full bg-primary hover:bg-primary/90 lg:w-auto"
           >
             <Plus className="h-4 w-4 mr-2" />
             Agregar Propietario
           </Button>
         </div>
 
-        {/* Filters */}
-        <Card className="w-full">
-          <CardContent className="p-3 sm:p-4">
-            <div className="flex flex-col gap-3 sm:gap-4">
-              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
-                <div className="flex-1">
-                  <div className="relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-                    <Input
-                      placeholder="Buscar por nombre, email o documento..."
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      className="pl-10"
-                      size="sm"
-                    />
-                  </div>
+        {/* Filters - Better responsive layout */}
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex flex-col space-y-4 lg:flex-row lg:items-center lg:space-y-0">
+              <div className="flex-1">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                  <Input
+                    placeholder="Buscar por nombre, email o documento..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-10"
+                  />
                 </div>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        {/* Owners Table */}
+        {/* Owners Display - Enhanced responsive design */}
         <Card>
           <CardHeader>
             <CardTitle>Lista de Propietarios</CardTitle>
           </CardHeader>
-          <CardContent className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Nombre</TableHead>
-                  <TableHead>Documento</TableHead>
-                  <TableHead>Email</TableHead>
-                  <TableHead>Teléfono</TableHead>
-                  <TableHead className="w-[50px]"></TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredOwners.map(owner => (
-                  <TableRow key={owner.id}>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <User className="h-4 w-4" />
-                        <span>{owner.name}</span>
+          <CardContent>
+            {/* Mobile Cards */}
+            <div className="grid gap-4 md:hidden">
+              {filteredOwners.map(owner => (
+                <Card key={owner.id} className="p-4">
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="flex items-center gap-3">
+                      <User className="h-8 w-8 p-1 bg-primary/10 text-primary rounded-full" />
+                      <div>
+                        <h4 className="font-semibold">{owner.name}</h4>
+                        <p className="text-sm text-muted-foreground">{owner.documentNumber}</p>
                       </div>
-                    </TableCell>
-                    <TableCell>{owner.documentNumber}</TableCell>
-                    <TableCell>
-                      <a href={`mailto:${owner.email}`} className="hover:underline">
+                    </div>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="sm">
+                          <MoreVertical className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={() => handleEditOwner(owner)}>
+                          <Edit className="h-4 w-4 mr-2" />
+                          Editar
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <Mail className="h-4 w-4 text-muted-foreground" />
+                      <a href={`mailto:${owner.email}`} className="text-sm hover:underline">
                         {owner.email}
                       </a>
-                    </TableCell>
-                    <TableCell>
-                      <a href={`tel:${owner.phone}`} className="hover:underline">
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Phone className="h-4 w-4 text-muted-foreground" />
+                      <a href={`tel:${owner.phone}`} className="text-sm hover:underline">
                         {owner.phone}
                       </a>
-                    </TableCell>
-                    <TableCell>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="sm">
-                            <MoreVertical className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => handleEditOwner(owner)}>
-                            <Edit className="h-4 w-4 mr-2" />
-                            Editar
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </TableCell>
+                    </div>
+                  </div>
+                </Card>
+              ))}
+            </div>
+
+            {/* Desktop Table */}
+            <div className="hidden md:block overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="min-w-[200px]">Nombre</TableHead>
+                    <TableHead className="min-w-[150px]">Documento</TableHead>
+                    <TableHead className="min-w-[200px]">Email</TableHead>
+                    <TableHead className="min-w-[150px]">Teléfono</TableHead>
+                    <TableHead className="w-[50px]"></TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {filteredOwners.map(owner => (
+                    <TableRow key={owner.id}>
+                      <TableCell>
+                        <div className="flex items-center gap-3">
+                          <User className="h-8 w-8 p-1 bg-primary/10 text-primary rounded-full" />
+                          <span className="font-medium">{owner.name}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell className="font-mono text-sm">{owner.documentNumber}</TableCell>
+                      <TableCell>
+                        <a href={`mailto:${owner.email}`} className="hover:underline text-primary">
+                          {owner.email}
+                        </a>
+                      </TableCell>
+                      <TableCell>
+                        <a href={`tel:${owner.phone}`} className="hover:underline text-primary">
+                          {owner.phone}
+                        </a>
+                      </TableCell>
+                      <TableCell>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="sm">
+                              <MoreVertical className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={() => handleEditOwner(owner)}>
+                              <Edit className="h-4 w-4 mr-2" />
+                              Editar
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+
+            {/* Empty state */}
+            {filteredOwners.length === 0 && (
+              <div className="text-center py-8">
+                <User className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                <p className="text-muted-foreground">
+                  {selectedBuilding 
+                    ? `No se encontraron propietarios en ${selectedBuilding.name}`
+                    : "No se encontraron propietarios con los filtros aplicados"
+                  }
+                </p>
+              </div>
+            )}
           </CardContent>
         </Card>
 
