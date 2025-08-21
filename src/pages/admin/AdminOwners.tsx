@@ -116,6 +116,7 @@ const AdminOwners: React.FC = () => {
         mockApartments
           .filter(apt => apt.buildingId === selectedBuilding.id && apt.ownerId)
           .map(apt => apt.ownerId)
+          .filter((id): id is string => id !== null && id !== undefined)
       );
       owners = owners.filter(owner => ownerIdsInBuilding.has(owner.id));
     }

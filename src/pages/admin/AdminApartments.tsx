@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -270,6 +271,7 @@ const AdminApartments: React.FC = () => {
       aliquotType: mockAliquotTypes.find(type => type.id === (apartmentData.aliquotTypeId || '1')),
       ownerIds: [],
       owners: [],
+      monthlyFee: Number(apartmentData.monthlyFee) || 0,
       createdAt: apartmentData.createdAt || new Date().toISOString(),
       updatedAt: new Date().toISOString()
     };
