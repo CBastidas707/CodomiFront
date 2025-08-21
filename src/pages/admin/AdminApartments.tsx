@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -265,7 +264,7 @@ const AdminApartments: React.FC = () => {
     const extendedApartmentData: ExtendedApartment = {
       ...apartmentData,
       buildingName: buildings.find(b => b.id === apartmentData.buildingId)?.name || 'Edificio Desconocido',
-      squareMeters: apartmentData.squareMeters || 0,
+      squareMeters: Number(apartmentData.squareMeters) || 0,
       measurementType: 'area' as const,
       aliquotTypeId: apartmentData.aliquotTypeId || '1',
       aliquotType: mockAliquotTypes.find(type => type.id === (apartmentData.aliquotTypeId || '1')),
