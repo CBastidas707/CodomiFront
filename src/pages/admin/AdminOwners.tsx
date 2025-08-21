@@ -89,7 +89,7 @@ const mockApartments: Apartment[] = [
 ];
 
 const AdminOwners: React.FC = () => {
-  const { buildings } = useAuth();
+  const { buildings, selectedBuilding } = useAuth();
   const [searchTerm, setSearchTerm] = useState('');
   const [buildingFilter, setBuildingFilter] = useState('all');
   const [documentTypeFilter, setDocumentTypeFilter] = useState('all');
@@ -132,16 +132,21 @@ const AdminOwners: React.FC = () => {
 
   return (
     <div className="w-full min-h-screen bg-background">
-      <div className="w-full max-w-none mx-auto p-4 sm:p-6 space-y-6">
-        {/* Header - Full width and responsive */}
+      <div className="w-full p-4 sm:p-6 space-y-6">
+        {/* Header - Full width responsive */}
         <div className="w-full">
-          <div className="flex flex-col space-y-4 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex-1 min-w-0">
-              <h1 className="text-2xl sm:text-3xl font-bold text-foreground truncate">
+              <h1 className="text-2xl sm:text-3xl font-bold text-foreground">
                 Gestión de Propietarios
               </h1>
               <p className="text-sm sm:text-base text-muted-foreground mt-1">
                 Administra los propietarios y sus apartamentos
+                {selectedBuilding && (
+                  <span className="block sm:inline sm:ml-2 text-codomi-navy font-medium">
+                    • {selectedBuilding.name}
+                  </span>
+                )}
               </p>
             </div>
             <div className="flex-shrink-0">
@@ -156,11 +161,11 @@ const AdminOwners: React.FC = () => {
           </div>
         </div>
 
-        {/* Search and Filters - Improved responsive layout */}
+        {/* Search and Filters - Full width responsive */}
         <Card className="w-full">
           <CardContent className="p-4 sm:p-6">
             <div className="space-y-4">
-              {/* Search bar - full width on mobile */}
+              {/* Search bar */}
               <div className="w-full relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
                 <Input
@@ -171,42 +176,38 @@ const AdminOwners: React.FC = () => {
                 />
               </div>
               
-              {/* Filters - stack on mobile, row on desktop */}
-              <div className="flex flex-col sm:flex-row gap-3">
-                <div className="w-full sm:w-48">
-                  <Select value={buildingFilter} onValueChange={setBuildingFilter}>
-                    <SelectTrigger className="w-full">
-                      <Filter className="h-4 w-4 mr-2" />
-                      <SelectValue placeholder="Filtrar por edificio" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Todos los edificios</SelectItem>
-                      {buildings.map(building => (
-                        <SelectItem key={building.id} value={building.id}>
-                          {building.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="w-full sm:w-40">
-                  <Select value={documentTypeFilter} onValueChange={setDocumentTypeFilter}>
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Tipo documento" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Todos</SelectItem>
-                      <SelectItem value="cedula">Cédula</SelectItem>
-                      <SelectItem value="rif">RIF</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+              {/* Filters - Responsive grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                <Select value={buildingFilter} onValueChange={setBuildingFilter}>
+                  <SelectTrigger className="w-full">
+                    <Filter className="h-4 w-4 mr-2" />
+                    <SelectValue placeholder="Filtrar por edificio" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todos los edificios</SelectItem>
+                    {buildings.map(building => (
+                      <SelectItem key={building.id} value={building.id}>
+                        {building.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Select value={documentTypeFilter} onValueChange={setDocumentTypeFilter}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Tipo documento" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todos</SelectItem>
+                    <SelectItem value="cedula">Cédula</SelectItem>
+                    <SelectItem value="rif">RIF</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        {/* Owners List - Responsive table */}
+        {/* Owners List - Full width responsive */}
         <Card className="w-full">
           <CardHeader>
             <CardTitle>Propietarios ({filteredOwners.length})</CardTitle>
@@ -217,11 +218,11 @@ const AdminOwners: React.FC = () => {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Propietario</TableHead>
-                      <TableHead className="hidden sm:table-cell">Documento</TableHead>
-                      <TableHead className="hidden md:table-cell">Contacto</TableHead>
-                      <TableHead>Apartamentos</TableHead>
-                      <TableHead className="text-right">Acciones</TableHead>
+                      <TableHead className="min-w-[200px]">Propietario</TableHead>
+                      <TableHead className="hidden sm:table-cell min-w-[150px]">Documento</TableHead>
+                      <TableHead className="hidden md:table-cell min-w-[200px]">Contacto</TableHead>
+                      <TableHead className="min-w-[180px]">Apartamentos</TableHead>
+                      <TableHead className="text-right min-w-[120px]">Acciones</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -229,13 +230,13 @@ const AdminOwners: React.FC = () => {
                       const apartments = getOwnerApartments(owner.id);
                       return (
                         <TableRow key={owner.id} className="hover:bg-muted/50">
-                          <TableCell className="min-w-0">
+                          <TableCell>
                             <div className="flex items-center gap-3">
                               <div className="h-8 w-8 sm:h-10 sm:w-10 bg-muted rounded-full flex items-center justify-center flex-shrink-0">
                                 <User className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground" />
                               </div>
                               <div className="min-w-0 flex-1">
-                                <p className="font-medium text-foreground truncate">{owner.name}</p>
+                                <p className="font-medium text-foreground">{owner.name}</p>
                                 <p className="text-xs sm:text-sm text-muted-foreground">
                                   Creado: {new Date(owner.createdAt).toLocaleDateString()}
                                 </p>
@@ -258,7 +259,7 @@ const AdminOwners: React.FC = () => {
                               {owner.email && (
                                 <div className="flex items-center gap-1 text-sm text-muted-foreground">
                                   <Mail className="h-3 w-3" />
-                                  <span className="truncate">{owner.email}</span>
+                                  <span className="truncate max-w-[150px]">{owner.email}</span>
                                 </div>
                               )}
                               {owner.phone && (
@@ -287,12 +288,12 @@ const AdminOwners: React.FC = () => {
                             </div>
                           </TableCell>
                           <TableCell className="text-right">
-                            <div className="flex flex-col sm:flex-row gap-1 sm:gap-2 justify-end">
+                            <div className="flex flex-col gap-1 sm:flex-row sm:gap-2 justify-end">
                               <Button
                                 variant="outline"
                                 size="sm"
                                 onClick={() => handleViewOwner(owner)}
-                                className="text-xs"
+                                className="text-xs w-full sm:w-auto"
                               >
                                 Ver
                               </Button>
@@ -300,7 +301,7 @@ const AdminOwners: React.FC = () => {
                                 variant="outline"
                                 size="sm"
                                 onClick={() => handleEditOwner(owner)}
-                                className="text-xs"
+                                className="text-xs w-full sm:w-auto"
                               >
                                 Editar
                               </Button>

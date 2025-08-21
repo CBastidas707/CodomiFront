@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
 export type UserRole = 'admin' | 'owner' | 'junta';
@@ -40,17 +39,23 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Mock condominiums for demo purposes
+// Enhanced mock condominiums for better testing
 const mockCondominiums: Condominium[] = [
   { id: '1', name: 'Condominio Los Almendros' },
-  { id: '2', name: 'Condominio Vista Hermosa' }
+  { id: '2', name: 'Condominio Vista Hermosa' },
+  { id: '3', name: 'Condominio El Paraíso' }
 ];
 
-// Mock buildings for demo purposes
+// Enhanced mock buildings for better testing
 const mockBuildings: Building[] = [
   { id: '1', name: 'Torre Norte', address: 'Av. Principal 123', condominiumId: '1' },
   { id: '2', name: 'Torre Sur', address: 'Av. Secundaria 456', condominiumId: '1' },
-  { id: '3', name: 'Edificio Central', address: 'Calle Central 789', condominiumId: '2' }
+  { id: '3', name: 'Torre Este', address: 'Calle Este 789', condominiumId: '1' },
+  { id: '4', name: 'Torre Oeste', address: 'Calle Oeste 321', condominiumId: '1' },
+  { id: '5', name: 'Edificio Central', address: 'Calle Central 789', condominiumId: '2' },
+  { id: '6', name: 'Edificio Plaza', address: 'Plaza Mayor 654', condominiumId: '2' },
+  { id: '7', name: 'Residencias Premium', address: 'Av. Premium 987', condominiumId: '3' },
+  { id: '8', name: 'Torres Gemelas', address: 'Av. Gemelas 147', condominiumId: '3' }
 ];
 
 // Mock users for demo purposes

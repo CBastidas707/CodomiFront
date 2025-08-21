@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
@@ -7,38 +8,10 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Search, X, Plus, Unlink, Building } from 'lucide-react';
 import { Owner, Apartment } from '@/types/owner';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-
-// Mock buildings data for testing
-const mockBuildings = [
-  { id: '1', name: 'Torre Norte' },
-  { id: '2', name: 'Torre Sur' },
-  { id: '3', name: 'Torre Este' },
-  { id: '4', name: 'Torre Oeste' }
-];
-
-// Mock apartments data for testing
-const mockApartmentsData: Apartment[] = [
-  { id: 'apt1', number: '101', floor: '1', buildingId: '1', buildingName: 'Torre Norte', ownerId: '1', ownerName: 'Juan Pérez', status: 'occupied', monthlyFee: 25000 },
-  { id: 'apt2', number: '201', floor: '2', buildingId: '1', buildingName: 'Torre Norte', ownerId: '1', ownerName: 'Juan Pérez', status: 'occupied', monthlyFee: 25000 },
-  { id: 'apt3', number: '301', floor: '3', buildingId: '1', buildingName: 'Torre Norte', ownerId: '2', ownerName: 'María González', status: 'occupied', monthlyFee: 25000 },
-  { id: 'apt4', number: '102', floor: '1', buildingId: '2', buildingName: 'Torre Sur', ownerId: '3', ownerName: 'Empresa ABC C.A.', status: 'occupied', monthlyFee: 30000 },
-  { id: 'apt5', number: '202', floor: '2', buildingId: '2', buildingName: 'Torre Sur', ownerId: '3', ownerName: 'Empresa ABC C.A.', status: 'occupied', monthlyFee: 30000 },
-  { id: 'apt6', number: '302', floor: '3', buildingId: '2', buildingName: 'Torre Sur', ownerId: '3', ownerName: 'Empresa ABC C.A.', status: 'occupied', monthlyFee: 30000 },
-  { id: 'apt7', number: '401', floor: '4', buildingId: '1', buildingName: 'Torre Norte', ownerId: '4', ownerName: 'Carlos Rodríguez', status: 'occupied', monthlyFee: 25000 },
-  { id: 'apt8', number: '103', floor: '1', buildingId: '3', buildingName: 'Torre Este', ownerId: '5', ownerName: 'Ana Martínez', status: 'occupied', monthlyFee: 28000 },
-  { id: 'apt9', number: '203', floor: '2', buildingId: '3', buildingName: 'Torre Este', ownerId: '5', ownerName: 'Ana Martínez', status: 'occupied', monthlyFee: 28000 },
-  { id: 'apt10', number: '303', floor: '3', buildingId: '3', buildingName: 'Torre Este', ownerId: null, ownerName: null, status: 'vacant', monthlyFee: 28000 },
-  { id: 'apt11', number: '403', floor: '4', buildingId: '3', buildingName: 'Torre Este', ownerId: null, ownerName: null, status: 'vacant', monthlyFee: 28000 },
-  { id: 'apt12', number: '104', floor: '1', buildingId: '4', buildingName: 'Torre Oeste', ownerId: null, ownerName: null, status: 'vacant', monthlyFee: 32000 },
-  { id: 'apt13', number: '204', floor: '2', buildingId: '4', buildingName: 'Torre Oeste', ownerId: null, ownerName: null, status: 'maintenance', monthlyFee: 32000 },
-  { id: 'apt14', number: '304', floor: '3', buildingId: '4', buildingName: 'Torre Oeste', ownerId: null, ownerName: null, status: 'vacant', monthlyFee: 32000 },
-  { id: 'apt15', number: '404', floor: '4', buildingId: '4', buildingName: 'Torre Oeste', ownerId: null, ownerName: null, status: 'vacant', monthlyFee: 32000 }
-];
 
 interface OwnerFormProps {
   owner?: Owner | null;
@@ -54,11 +27,7 @@ const OwnerForm: React.FC<OwnerFormProps> = ({
   onSave
 }) => {
   const { toast } = useToast();
-  const { buildings: authBuildings } = useAuth();
-  
-  // Use mock data if auth buildings are empty or use real data if available
-  const buildings = authBuildings.length > 0 ? authBuildings : mockBuildings;
-  const allApartments = availableApartments.length > 0 ? availableApartments : mockApartmentsData;
+  const { selectedBuilding } = useAuth();
 
   const [formData, setFormData] = useState({
     name: owner?.name || '',
@@ -69,21 +38,24 @@ const OwnerForm: React.FC<OwnerFormProps> = ({
   });
   const [linkedApartments, setLinkedApartments] = useState<Apartment[]>([]);
   const [apartmentSearch, setApartmentSearch] = useState('');
-  const [selectedBuilding, setSelectedBuilding] = useState<string>('all');
-  const [searchMode, setSearchMode] = useState<'free' | 'structured'>('free');
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [showUnlinkConfirm, setShowUnlinkConfirm] = useState(false);
   const [showSaveConfirm, setShowSaveConfirm] = useState(false);
   const [apartmentToUnlink, setApartmentToUnlink] = useState<string | null>(null);
 
+  // Filter apartments to only show those from the selected building
+  const buildingApartments = availableApartments.filter(apt => 
+    !selectedBuilding || apt.buildingId === selectedBuilding.id
+  );
+
   useEffect(() => {
     if (owner) {
-      const ownerApartments = allApartments.filter(apt => 
+      const ownerApartments = buildingApartments.filter(apt => 
         owner.apartmentIds.includes(apt.id)
       );
       setLinkedApartments(ownerApartments);
     }
-  }, [owner, allApartments]);
+  }, [owner, buildingApartments]);
 
   const validateDocument = (type: 'cedula' | 'rif', number: string) => {
     if (type === 'cedula') {
@@ -167,32 +139,17 @@ const OwnerForm: React.FC<OwnerFormProps> = ({
     setShowUnlinkConfirm(false);
   };
 
-  // Filter apartments based on search mode
+  // Filter available apartments by search term
   const getFilteredApartments = () => {
-    let filtered = allApartments.filter(apt => 
+    let filtered = buildingApartments.filter(apt => 
       !linkedApartments.find(linked => linked.id === apt.id) && 
       (!apt.ownerId || apt.ownerId === owner?.id)
     );
 
-    if (searchMode === 'structured') {
-      // First filter by building if selected
-      if (selectedBuilding !== 'all') {
-        filtered = filtered.filter(apt => apt.buildingId === selectedBuilding);
-      }
-      // Then by apartment search if any
-      if (apartmentSearch) {
-        filtered = filtered.filter(apt =>
-          apt.number.toLowerCase().includes(apartmentSearch.toLowerCase())
-        );
-      }
-    } else {
-      // Free search mode - search across both building and apartment
-      if (apartmentSearch) {
-        filtered = filtered.filter(apt =>
-          apt.number.toLowerCase().includes(apartmentSearch.toLowerCase()) ||
-          apt.buildingName.toLowerCase().includes(apartmentSearch.toLowerCase())
-        );
-      }
+    if (apartmentSearch) {
+      filtered = filtered.filter(apt =>
+        apt.number.toLowerCase().includes(apartmentSearch.toLowerCase())
+      );
     }
 
     return filtered;
@@ -206,8 +163,14 @@ const OwnerForm: React.FC<OwnerFormProps> = ({
       <Dialog open={true} onOpenChange={() => onClose()}>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>
+            <DialogTitle className="flex items-center gap-2">
               {owner ? 'Editar Propietario' : 'Crear Nuevo Propietario'}
+              {selectedBuilding && (
+                <Badge variant="outline" className="ml-2">
+                  <Building className="h-3 w-3 mr-1" />
+                  {selectedBuilding.name}
+                </Badge>
+              )}
             </DialogTitle>
           </DialogHeader>
 
@@ -298,143 +261,125 @@ const OwnerForm: React.FC<OwnerFormProps> = ({
             {/* Apartment Management */}
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg">Gestión de Apartamentos</CardTitle>
+                <CardTitle className="text-lg flex items-center gap-2">
+                  Gestión de Apartamentos
+                  {selectedBuilding && (
+                    <Badge variant="secondary" className="text-sm">
+                      {selectedBuilding.name}
+                    </Badge>
+                  )}
+                </CardTitle>
+                {!selectedBuilding && (
+                  <p className="text-sm text-muted-foreground">
+                    Debe seleccionar un edificio para gestionar apartamentos
+                  </p>
+                )}
               </CardHeader>
               <CardContent className="space-y-6">
-                {/* Linked Apartments */}
-                <div>
-                  <Label className="text-sm font-medium mb-3 block">
-                    Apartamentos Vinculados ({linkedApartments.length})
-                  </Label>
-                  {linkedApartments.length > 0 ? (
-                    <div className="space-y-2">
-                      {linkedApartments.map(apartment => (
-                        <div key={apartment.id} className="flex items-center justify-between p-3 border rounded-lg bg-muted/30">
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2">
-                              <Building className="h-4 w-4 text-muted-foreground" />
-                              <span className="font-medium">{apartment.buildingName}</span>
-                              <Badge variant="outline">Apt. {apartment.number}</Badge>
+                {selectedBuilding ? (
+                  <>
+                    {/* Linked Apartments */}
+                    <div>
+                      <Label className="text-sm font-medium mb-3 block">
+                        Apartamentos Vinculados ({linkedApartments.length})
+                      </Label>
+                      {linkedApartments.length > 0 ? (
+                        <div className="space-y-2">
+                          {linkedApartments.map(apartment => (
+                            <div key={apartment.id} className="flex items-center justify-between p-3 border rounded-lg bg-muted/30">
+                              <div className="flex-1">
+                                <div className="flex items-center gap-2">
+                                  <Building className="h-4 w-4 text-muted-foreground" />
+                                  <Badge variant="outline">Apt. {apartment.number}</Badge>
+                                </div>
+                                <p className="text-sm text-muted-foreground mt-1">
+                                  Piso {apartment.floor} • Bs. {apartment.monthlyFee.toLocaleString()}
+                                </p>
+                              </div>
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleUnlinkApartment(apartment.id)}
+                                className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                              >
+                                <Unlink className="h-4 w-4" />
+                              </Button>
                             </div>
-                            <p className="text-sm text-muted-foreground mt-1">
-                              Piso {apartment.floor} • Bs. {apartment.monthlyFee.toLocaleString()}
-                            </p>
-                          </div>
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleUnlinkApartment(apartment.id)}
-                            className="text-red-500 hover:text-red-700 hover:bg-red-50"
-                          >
-                            <Unlink className="h-4 w-4" />
-                          </Button>
+                          ))}
                         </div>
-                      ))}
+                      ) : (
+                        <p className="text-muted-foreground text-sm">No hay apartamentos vinculados</p>
+                      )}
                     </div>
-                  ) : (
-                    <p className="text-muted-foreground text-sm">No hay apartamentos vinculados</p>
-                  )}
-                </div>
 
-                {/* Search and Link Apartments */}
-                <div>
-                  <Label className="text-sm font-medium mb-3 block">
-                    Buscar y Vincular Apartamentos
-                  </Label>
-                  
-                  {/* Search Mode Tabs */}
-                  <Tabs value={searchMode} onValueChange={(value: 'free' | 'structured') => {
-                    setSearchMode(value);
-                    setApartmentSearch('');
-                    setSelectedBuilding('all');
-                  }} className="w-full">
-                    <TabsList className="grid w-full grid-cols-2 mb-4">
-                      <TabsTrigger value="free">Búsqueda Libre</TabsTrigger>
-                      <TabsTrigger value="structured">Por Edificio</TabsTrigger>
-                    </TabsList>
-                    
-                    <TabsContent value="free" className="space-y-3">
-                      <div className="relative">
-                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-                        <Input
-                          placeholder="Buscar por edificio o apartamento..."
-                          value={apartmentSearch}
-                          onChange={(e) => setApartmentSearch(e.target.value)}
-                          className="pl-10"
-                        />
-                      </div>
-                    </TabsContent>
-                    
-                    <TabsContent value="structured" className="space-y-3">
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <Select value={selectedBuilding} onValueChange={setSelectedBuilding}>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Seleccionar edificio" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="all">Todos los edificios</SelectItem>
-                            {buildings.map(building => (
-                              <SelectItem key={building.id} value={building.id}>
-                                {building.name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                    {/* Search and Link Apartments */}
+                    <div>
+                      <Label className="text-sm font-medium mb-3 block">
+                        Buscar y Vincular Apartamentos
+                      </Label>
+                      
+                      <div className="space-y-3">
                         <div className="relative">
                           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
                           <Input
-                            placeholder="Buscar apartamento..."
+                            placeholder="Buscar apartamento por número..."
                             value={apartmentSearch}
                             onChange={(e) => setApartmentSearch(e.target.value)}
                             className="pl-10"
                           />
                         </div>
-                      </div>
-                    </TabsContent>
-                  </Tabs>
 
-                  {/* Search Results - Improved list format */}
-                  {(apartmentSearch || selectedBuilding !== 'all') && (
-                    <div className="mt-3 max-h-48 overflow-y-auto border rounded-lg bg-card">
-                      {filteredApartments.length > 0 ? (
-                        <div className="divide-y">
-                          {filteredApartments.map(apartment => (
-                            <div
-                              key={apartment.id}
-                              className="flex items-center justify-between p-3 hover:bg-muted/50 cursor-pointer transition-colors"
-                              onClick={() => handleLinkApartment(apartment)}
-                            >
-                              <div className="flex-1">
-                                <div className="flex items-center gap-2 mb-1">
-                                  <Building className="h-4 w-4 text-muted-foreground" />
-                                  <span className="font-medium">{apartment.buildingName}</span>
-                                  <Badge variant="outline">Apt. {apartment.number}</Badge>
-                                </div>
-                                <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                                  <span>Piso {apartment.floor}</span>
-                                  <span>Bs. {apartment.monthlyFee.toLocaleString()}</span>
-                                  <Badge 
-                                    variant={apartment.status === 'vacant' ? 'secondary' : 'outline'}
-                                    className="text-xs"
+                        {/* Search Results */}
+                        {apartmentSearch && (
+                          <div className="max-h-48 overflow-y-auto border rounded-lg bg-card">
+                            {filteredApartments.length > 0 ? (
+                              <div className="divide-y">
+                                {filteredApartments.map(apartment => (
+                                  <div
+                                    key={apartment.id}
+                                    className="flex items-center justify-between p-3 hover:bg-muted/50 cursor-pointer transition-colors"
+                                    onClick={() => handleLinkApartment(apartment)}
                                   >
-                                    {apartment.status === 'occupied' ? 'Ocupado' : 
-                                     apartment.status === 'vacant' ? 'Vacante' : 'Mantenimiento'}
-                                  </Badge>
-                                </div>
+                                    <div className="flex-1">
+                                      <div className="flex items-center gap-2 mb-1">
+                                        <Building className="h-4 w-4 text-muted-foreground" />
+                                        <Badge variant="outline">Apt. {apartment.number}</Badge>
+                                      </div>
+                                      <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                                        <span>Piso {apartment.floor}</span>
+                                        <span>Bs. {apartment.monthlyFee.toLocaleString()}</span>
+                                        <Badge 
+                                          variant={apartment.status === 'vacant' ? 'secondary' : 'outline'}
+                                          className="text-xs"
+                                        >
+                                          {apartment.status === 'occupied' ? 'Ocupado' : 
+                                           apartment.status === 'vacant' ? 'Vacante' : 'Mantenimiento'}
+                                        </Badge>
+                                      </div>
+                                    </div>
+                                    <Plus className="h-4 w-4 text-green-500 flex-shrink-0" />
+                                  </div>
+                                ))}
                               </div>
-                              <Plus className="h-4 w-4 text-green-500 flex-shrink-0" />
-                            </div>
-                          ))}
-                        </div>
-                      ) : (
-                        <p className="p-4 text-sm text-muted-foreground text-center">
-                          No se encontraron apartamentos disponibles
-                        </p>
-                      )}
+                            ) : (
+                              <p className="p-4 text-sm text-muted-foreground text-center">
+                                No se encontraron apartamentos disponibles en {selectedBuilding.name}
+                              </p>
+                            )}
+                          </div>
+                        )}
+                      </div>
                     </div>
-                  )}
-                </div>
+                  </>
+                ) : (
+                  <div className="text-center py-8">
+                    <Building className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                    <p className="text-muted-foreground">
+                      Seleccione un edificio para gestionar apartamentos
+                    </p>
+                  </div>
+                )}
               </CardContent>
             </Card>
 
@@ -457,7 +402,7 @@ const OwnerForm: React.FC<OwnerFormProps> = ({
           <AlertDialogHeader>
             <AlertDialogTitle>Confirmar Desvinculación</AlertDialogTitle>
             <AlertDialogDescription>
-              ¿Está seguro de que desea desvincular el apartamento {apartmentToUnlinkData?.number} del edificio {apartmentToUnlinkData?.buildingName}?
+              ¿Está seguro de que desea desvincular el apartamento {apartmentToUnlinkData?.number}?
               Esta acción no se puede deshacer.
             </AlertDialogDescription>
           </AlertDialogHeader>
