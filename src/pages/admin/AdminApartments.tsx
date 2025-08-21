@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -208,17 +207,28 @@ const AdminApartments: React.FC = () => {
     console.log('Navigate to payments for apartment:', apartmentId);
   };
 
-  const handleSaveApartment = (apartmentData: ExtendedApartment) => {
+  const handleSaveApartment = (apartmentData: any) => {
+    const extendedApartmentData: ExtendedApartment = {
+      ...apartmentData,
+      buildingName: buildings.find(b => b.id === apartmentData.buildingId)?.name || 'Edificio Desconocido',
+      squareMeters: apartmentData.squareMeters || 0,
+      measurementType: 'area' as const,
+      aliquotTypeId: apartmentData.aliquotTypeId || '1',
+      aliquotType: mockAliquotTypes.find(type => type.id === (apartmentData.aliquotTypeId || '1')),
+      ownerIds: [],
+      owners: [],
+      createdAt: apartmentData.createdAt || new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+
     if (editingApartment) {
       setApartments(prev => prev.map(apt => 
-        apt.id === editingApartment.id ? { ...apartmentData, id: editingApartment.id } : apt
+        apt.id === editingApartment.id ? { ...extendedApartmentData, id: editingApartment.id } : apt
       ));
     } else {
       const newApartment = {
-        ...apartmentData,
-        id: `apt-${Date.now()}`,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+        ...extendedApartmentData,
+        id: `apt-${Date.now()}`
       };
       setApartments(prev => [...prev, newApartment]);
     }
@@ -512,8 +522,6 @@ const AdminApartments: React.FC = () => {
       {showApartmentForm && (
         <ApartmentForm
           apartment={editingApartment}
-          buildings={buildings}
-          aliquotTypes={mockAliquotTypes}
           onClose={() => {
             setShowApartmentForm(false);
             setEditingApartment(null);
