@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from 'react';
 import { Plus, Search, Filter, User, Phone, Mail } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -116,7 +115,7 @@ const AdminOwners: React.FC = () => {
         mockApartments
           .filter(apt => apt.buildingId === selectedBuilding.id && apt.ownerId)
           .map(apt => apt.ownerId)
-          .filter((id): id is string => id !== null && id !== undefined)
+          .filter((id): id is string => typeof id === 'string' && id !== null && id !== undefined)
       );
       owners = owners.filter(owner => ownerIdsInBuilding.has(owner.id));
     }
