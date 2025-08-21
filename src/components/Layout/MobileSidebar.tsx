@@ -13,7 +13,8 @@ import {
   Search,
   Menu,
   Megaphone,
-  X
+  X,
+  Building2
 } from 'lucide-react';
 
 const MobileSidebar: React.FC = () => {
@@ -23,6 +24,7 @@ const MobileSidebar: React.FC = () => {
   const adminMenuItems = [
     { icon: Home, label: 'Panel de Control', path: '/admin' },
     { icon: User, label: 'Gestión de Propietarios', path: '/admin/owners' },
+    { icon: Building2, label: 'Gestión de Apartamentos', path: '/admin/apartments' },
     { icon: Calendar, label: 'Gestión Financiera', path: '/admin/finance' },
     { icon: Search, label: 'Gestión de Recibos', path: '/admin/receipts' },
     { icon: Plus, label: 'Análisis de Datos', path: '/admin/analytics' },
