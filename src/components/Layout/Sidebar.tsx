@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -51,7 +50,7 @@ const Sidebar: React.FC = () => {
   const menuItems = getMenuItems();
 
   return (
-    <aside className="hidden md:block w-64 bg-white border-r border-gray-100">
+    <aside className="hidden md:block w-64 bg-white border-r border-gray-200 shadow-sm">
       <nav className="mt-8 px-4">
         <ul className="space-y-2">
           {menuItems.map((item) => (
@@ -61,7 +60,7 @@ const Sidebar: React.FC = () => {
                 className={({ isActive }) =>
                   `flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors ${
                     isActive
-                      ? 'bg-codomi-navy text-white'
+                      ? 'bg-codomi-navy text-white shadow-sm'
                       : 'text-gray-700 hover:bg-codomi-gray hover:text-codomi-navy'
                   }`
                 }
