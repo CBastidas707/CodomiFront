@@ -6,7 +6,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Building } from 'lucide-react';
@@ -104,6 +103,39 @@ const ApartmentForm: React.FC<ApartmentFormProps> = ({
     setShowSaveConfirm(false);
   };
 
+  const getStatusLabel = (status: string) => {
+    switch (status) {
+      case 'occupied':
+        return 'Ocupado';
+      case 'vacant':
+        return 'Vacante';
+      case 'maintenance':
+        return 'Mantenimiento';
+      default:
+        return status;
+    }
+  };
+
+  const getStatusButtonClass = (status: string, currentStatus: string) => {
+    const isSelected = status === currentStatus;
+    const baseClasses = "flex-1 py-3 px-4 rounded-lg border-2 transition-all duration-200 font-medium text-sm";
+    
+    if (isSelected) {
+      switch (status) {
+        case 'occupied':
+          return `${baseClasses} bg-green-50 border-green-500 text-green-700`;
+        case 'vacant':
+          return `${baseClasses} bg-blue-50 border-blue-500 text-blue-700`;
+        case 'maintenance':
+          return `${baseClasses} bg-yellow-50 border-yellow-500 text-yellow-700`;
+        default:
+          return `${baseClasses} bg-gray-50 border-gray-500 text-gray-700`;
+      }
+    } else {
+      return `${baseClasses} bg-white border-gray-200 text-gray-600 hover:border-gray-300 hover:bg-gray-50`;
+    }
+  };
+
   return (
     <>
       <Dialog open={true} onOpenChange={() => onClose()}>
@@ -183,32 +215,18 @@ const ApartmentForm: React.FC<ApartmentFormProps> = ({
                     <Label className="text-sm font-medium mb-3 block">
                       Estado del Apartamento *
                     </Label>
-                    <RadioGroup
-                      value={formData.status}
-                      onValueChange={(value: 'occupied' | 'vacant' | 'maintenance') => 
-                        setFormData({ ...formData, status: value })
-                      }
-                      className="flex flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-6"
-                    >
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="vacant" id="vacant" />
-                        <Label htmlFor="vacant" className="text-sm cursor-pointer">
-                          Vacante
-                        </Label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="occupied" id="occupied" />
-                        <Label htmlFor="occupied" className="text-sm cursor-pointer">
-                          Ocupado
-                        </Label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="maintenance" id="maintenance" />
-                        <Label htmlFor="maintenance" className="text-sm cursor-pointer">
-                          Mantenimiento
-                        </Label>
-                      </div>
-                    </RadioGroup>
+                    <div className="flex flex-col sm:flex-row gap-3">
+                      {(['vacant', 'occupied', 'maintenance'] as const).map((status) => (
+                        <button
+                          key={status}
+                          type="button"
+                          onClick={() => setFormData({ ...formData, status })}
+                          className={getStatusButtonClass(status, formData.status)}
+                        >
+                          {getStatusLabel(status)}
+                        </button>
+                      ))}
+                    </div>
                   </div>
                 </div>
               </CardContent>

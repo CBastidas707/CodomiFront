@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from 'react';
 import { Plus, Search, User, Phone, Mail } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -169,6 +168,24 @@ const AdminOwners: React.FC = () => {
     setEditingOwner(null);
   };
 
+  const formatDocumentNumber = (owner: Owner) => {
+    // Extraer solo el número/letra del documento y formatearlo correctamente
+    const docNumber = owner.documentNumber;
+    
+    // Si ya está en el formato correcto (con guión), devolverlo tal como está
+    if (docNumber.includes('-')) {
+      return docNumber;
+    }
+    
+    // Si comienza con V, E, J, G, P, etc. y no tiene guión, agregarlo
+    if (/^[VEJGP]\d+/.test(docNumber)) {
+      return docNumber.replace(/^([VEJGP])(\d+)/, '$1-$2');
+    }
+    
+    // Para otros casos, devolver el documento tal como está
+    return docNumber;
+  };
+
   // Filter owners based on search term and selected building
   const filteredOwners = useMemo(() => {
     let filteredOwners = [...owners];
@@ -198,17 +215,17 @@ const AdminOwners: React.FC = () => {
 
   return (
     <div className="min-h-screen w-full bg-background">
-      <div className="container mx-auto px-4 py-6 space-y-6">
+      <div className="container mx-auto px-4 py-6 space-y-6 max-w-full">
         {/* Header - Improved responsivity */}
         <div className="flex flex-col space-y-4 lg:flex-row lg:items-center lg:justify-between lg:space-y-0">
-          <div className="space-y-2">
-            <h1 className="text-2xl font-bold tracking-tight lg:text-3xl">
+          <div className="space-y-2 min-w-0">
+            <h1 className="text-2xl font-bold tracking-tight lg:text-3xl truncate">
               Gestión de Propietarios
             </h1>
             <p className="text-sm text-muted-foreground lg:text-base">
               Administra todos los propietarios
               {selectedBuilding && (
-                <span className="block text-primary font-medium lg:inline lg:ml-2">
+                <span className="block text-primary font-medium lg:inline lg:ml-2 truncate">
                   • {selectedBuilding.name}
                 </span>
               )}
@@ -221,7 +238,7 @@ const AdminOwners: React.FC = () => {
           </div>
           <Button 
             onClick={handleCreateOwner} 
-            className="w-full bg-primary hover:bg-primary/90 lg:w-auto"
+            className="w-full bg-primary hover:bg-primary/90 lg:w-auto flex-shrink-0"
           >
             <Plus className="h-4 w-4 mr-2" />
             Agregar Propietario
@@ -232,7 +249,7 @@ const AdminOwners: React.FC = () => {
         <Card>
           <CardContent className="p-6">
             <div className="flex flex-col space-y-4 lg:flex-row lg:items-center lg:space-y-0">
-              <div className="flex-1">
+              <div className="flex-1 min-w-0">
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
                   <Input
@@ -258,16 +275,18 @@ const AdminOwners: React.FC = () => {
               {filteredOwners.map(owner => (
                 <Card key={owner.id} className="p-4">
                   <div className="flex items-start justify-between mb-3">
-                    <div className="flex items-center gap-3">
-                      <User className="h-8 w-8 p-1 bg-primary/10 text-primary rounded-full" />
-                      <div>
-                        <h4 className="font-semibold">{owner.name}</h4>
-                        <p className="text-sm text-muted-foreground">{owner.documentNumber}</p>
+                    <div className="flex items-center gap-3 min-w-0 flex-1">
+                      <User className="h-8 w-8 p-1 bg-primary/10 text-primary rounded-full flex-shrink-0" />
+                      <div className="min-w-0 flex-1">
+                        <h4 className="font-semibold truncate">{owner.name}</h4>
+                        <p className="text-sm text-muted-foreground font-mono truncate">
+                          {formatDocumentNumber(owner)}
+                        </p>
                       </div>
                     </div>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="sm">
+                        <Button variant="ghost" size="sm" className="flex-shrink-0">
                           <MoreVertical className="h-4 w-4" />
                         </Button>
                       </DropdownMenuTrigger>
@@ -280,15 +299,15 @@ const AdminOwners: React.FC = () => {
                     </DropdownMenu>
                   </div>
                   <div className="space-y-2">
-                    <div className="flex items-center gap-2">
-                      <Mail className="h-4 w-4 text-muted-foreground" />
-                      <a href={`mailto:${owner.email}`} className="text-sm hover:underline">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <Mail className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                      <a href={`mailto:${owner.email}`} className="text-sm hover:underline truncate">
                         {owner.email}
                       </a>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <Phone className="h-4 w-4 text-muted-foreground" />
-                      <a href={`tel:${owner.phone}`} className="text-sm hover:underline">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <Phone className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                      <a href={`tel:${owner.phone}`} className="text-sm hover:underline truncate">
                         {owner.phone}
                       </a>
                     </div>
@@ -298,56 +317,60 @@ const AdminOwners: React.FC = () => {
             </div>
 
             {/* Desktop Table */}
-            <div className="hidden md:block overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="min-w-[200px]">Nombre</TableHead>
-                    <TableHead className="min-w-[150px]">Documento</TableHead>
-                    <TableHead className="min-w-[200px]">Email</TableHead>
-                    <TableHead className="min-w-[150px]">Teléfono</TableHead>
-                    <TableHead className="w-[50px]"></TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredOwners.map(owner => (
-                    <TableRow key={owner.id}>
-                      <TableCell>
-                        <div className="flex items-center gap-3">
-                          <User className="h-8 w-8 p-1 bg-primary/10 text-primary rounded-full" />
-                          <span className="font-medium">{owner.name}</span>
-                        </div>
-                      </TableCell>
-                      <TableCell className="font-mono text-sm">{owner.documentNumber}</TableCell>
-                      <TableCell>
-                        <a href={`mailto:${owner.email}`} className="hover:underline text-primary">
-                          {owner.email}
-                        </a>
-                      </TableCell>
-                      <TableCell>
-                        <a href={`tel:${owner.phone}`} className="hover:underline text-primary">
-                          {owner.phone}
-                        </a>
-                      </TableCell>
-                      <TableCell>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="sm">
-                              <MoreVertical className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={() => handleEditOwner(owner)}>
-                              <Edit className="h-4 w-4 mr-2" />
-                              Editar
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </TableCell>
+            <div className="hidden md:block">
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="min-w-[200px]">Nombre</TableHead>
+                      <TableHead className="min-w-[150px]">Documento</TableHead>
+                      <TableHead className="min-w-[200px]">Email</TableHead>
+                      <TableHead className="min-w-[150px]">Teléfono</TableHead>
+                      <TableHead className="w-[50px]"></TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredOwners.map(owner => (
+                      <TableRow key={owner.id}>
+                        <TableCell className="min-w-0">
+                          <div className="flex items-center gap-3 min-w-0">
+                            <User className="h-8 w-8 p-1 bg-primary/10 text-primary rounded-full flex-shrink-0" />
+                            <span className="font-medium truncate">{owner.name}</span>
+                          </div>
+                        </TableCell>
+                        <TableCell className="font-mono text-sm">
+                          {formatDocumentNumber(owner)}
+                        </TableCell>
+                        <TableCell className="min-w-0">
+                          <a href={`mailto:${owner.email}`} className="hover:underline text-primary truncate block">
+                            {owner.email}
+                          </a>
+                        </TableCell>
+                        <TableCell className="min-w-0">
+                          <a href={`tel:${owner.phone}`} className="hover:underline text-primary truncate block">
+                            {owner.phone}
+                          </a>
+                        </TableCell>
+                        <TableCell>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="sm">
+                                <MoreVertical className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem onClick={() => handleEditOwner(owner)}>
+                                <Edit className="h-4 w-4 mr-2" />
+                                Editar
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
             </div>
 
             {/* Empty state */}
