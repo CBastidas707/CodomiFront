@@ -25,7 +25,7 @@ const Layout: React.FC = () => {
   return (
     <div className="min-h-screen bg-codomi-gray flex flex-col w-full overflow-x-hidden">
       <Header />
-      <div className="flex flex-1 w-full min-w-0 relative">
+      <div className="flex flex-1 w-full min-w-0 relative pt-16">
         {isMobile ? <MobileSidebar /> : <Sidebar />}
         <main className={`flex-1 min-w-0 overflow-x-hidden ${!isMobile ? 'ml-64' : ''}`}>
           <div className="p-6 md:p-8 space-y-6">
