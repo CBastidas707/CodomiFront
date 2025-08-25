@@ -15,7 +15,7 @@ const Header: React.FC = () => {
   };
 
   return (
-    <header className="bg-codomi-navy text-white shadow-xl border-b-4 border-codomi-navy-dark w-full min-w-0 relative z-10">
+    <header className="bg-codomi-navy text-white shadow-xl border-b-4 border-codomi-navy-dark w-full min-w-0 fixed top-0 left-0 right-0 z-40 h-16">
       <div className="w-full min-w-0 px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16 min-w-0">
           <div className="flex items-center min-w-0 flex-shrink-0">

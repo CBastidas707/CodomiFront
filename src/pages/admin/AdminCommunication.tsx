@@ -75,64 +75,72 @@ const AdminCommunication: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6 h-full flex flex-col">
-      <div className="flex items-center gap-3">
-        <MessageSquare className="h-6 w-6 md:h-8 md:w-8 text-codomi-navy" />
-        <h1 className="text-2xl md:text-3xl font-bold text-codomi-navy">Comunicación</h1>
+    <div className="max-w-7xl mx-auto">
+      <div className="flex items-center gap-3 mb-6">
+        <MessageSquare className="h-8 w-8 text-codomi-navy" />
+        <h1 className="text-3xl font-bold text-codomi-navy">Comunicación</h1>
       </div>
 
-      <Card className="flex flex-col h-[600px]">
-        <CardHeader className="flex-shrink-0">
-          <CardTitle className="text-lg">Chat Comunitario</CardTitle>
+      <Card className="shadow-md">
+        <CardHeader className="bg-gray-50/50">
+          <CardTitle className="text-xl text-codomi-navy">Chat Comunitario</CardTitle>
         </CardHeader>
-        <CardContent className="flex-1 flex flex-col p-4 min-h-0">
-          {/* Área de mensajes con scroll fijo */}
-          <div className="flex-1 overflow-y-auto mb-4 p-4 border rounded-lg bg-gray-50 space-y-4 min-h-0">
-            {messages.map((message) => (
-              <div
-                key={message.id}
-                className={`flex gap-3 ${message.isAdmin ? 'justify-end' : 'justify-start'}`}
-              >
-                <div className={`flex gap-3 max-w-[70%] ${message.isAdmin ? 'flex-row-reverse' : 'flex-row'}`}>
-                  <Avatar className="h-8 w-8 flex-shrink-0">
-                    <AvatarFallback className={message.isAdmin ? 'bg-codomi-navy text-white' : 'bg-gray-300'}>
-                      {message.isAdmin ? 'AD' : <User className="h-4 w-4" />}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className={`space-y-1 ${message.isAdmin ? 'text-right' : 'text-left'}`}>
-                    <div className="flex items-center gap-2 text-xs text-gray-600">
-                      <span className="font-medium">{message.sender}</span>
-                      {message.apartment && <span>({message.apartment})</span>}
-                      <span>{message.timestamp}</span>
-                    </div>
-                    <div
-                      className={`p-3 rounded-lg text-sm ${
-                        message.isAdmin
-                          ? 'bg-codomi-navy text-white'
-                          : 'bg-white border shadow-sm'
-                      }`}
-                    >
-                      {message.content}
+        <CardContent className="p-0">
+          <div className="flex flex-col h-[calc(100vh-20rem)]">
+            {/* Área de mensajes con scroll */}
+            <div className="flex-1 overflow-y-auto p-6 space-y-4 min-h-0 bg-gradient-to-b from-gray-50/30 to-white">
+              {messages.map((message) => (
+                <div
+                  key={message.id}
+                  className={`flex gap-3 ${message.isAdmin ? 'justify-end' : 'justify-start'}`}
+                >
+                  <div className={`flex gap-3 max-w-[75%] ${message.isAdmin ? 'flex-row-reverse' : 'flex-row'}`}>
+                    <Avatar className="h-10 w-10 flex-shrink-0 shadow-sm">
+                      <AvatarFallback className={message.isAdmin ? 'bg-codomi-navy text-white' : 'bg-gray-100 text-gray-600'}>
+                        {message.isAdmin ? 'AD' : <User className="h-5 w-5" />}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className={`space-y-2 ${message.isAdmin ? 'text-right' : 'text-left'}`}>
+                      <div className="flex items-center gap-2 text-xs text-gray-500">
+                        <span className="font-medium">{message.sender}</span>
+                        {message.apartment && <span className="bg-gray-100 px-2 py-1 rounded-full">({message.apartment})</span>}
+                        <span>{message.timestamp}</span>
+                      </div>
+                      <div
+                        className={`p-4 rounded-xl text-sm shadow-sm ${
+                          message.isAdmin
+                            ? 'bg-codomi-navy text-white rounded-br-md'
+                            : 'bg-white border border-gray-200 rounded-bl-md'
+                        }`}
+                      >
+                        {message.content}
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            ))}
-            <div ref={messagesEndRef} />
-          </div>
+              ))}
+              <div ref={messagesEndRef} />
+            </div>
 
-          {/* Formulario de envío fijo */}
-          <form onSubmit={handleSendMessage} className="flex gap-2 flex-shrink-0">
-            <Input
-              value={newMessage}
-              onChange={(e) => setNewMessage(e.target.value)}
-              placeholder="Escribe tu mensaje..."
-              className="flex-1 text-base"
-            />
-            <Button type="submit" size="icon">
-              <Send className="h-4 w-4" />
-            </Button>
-          </form>
+            {/* Formulario de envío */}
+            <div className="border-t bg-white p-4">
+              <form onSubmit={handleSendMessage} className="flex gap-3">
+                <Input
+                  value={newMessage}
+                  onChange={(e) => setNewMessage(e.target.value)}
+                  placeholder="Escribe tu mensaje..."
+                  className="flex-1 text-base border-gray-300 focus:border-codomi-navy"
+                />
+                <Button 
+                  type="submit" 
+                  size="icon"
+                  className="bg-codomi-navy hover:bg-codomi-navy-dark shadow-sm"
+                >
+                  <Send className="h-4 w-4" />
+                </Button>
+              </form>
+            </div>
+          </div>
         </CardContent>
       </Card>
     </div>

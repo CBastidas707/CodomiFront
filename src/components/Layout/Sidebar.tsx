@@ -51,28 +51,40 @@ const Sidebar: React.FC = () => {
   const menuItems = getMenuItems();
 
   return (
-    <aside className="hidden md:block w-64 bg-white border-r-2 border-gray-200 shadow-md">
-      <nav className="mt-8 px-4">
-        <ul className="space-y-2">
-          {menuItems.map((item) => (
-            <li key={item.path}>
-              <NavLink
-                to={item.path}
-                className={({ isActive }) =>
-                  `flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-all duration-200 ${
-                    isActive
-                      ? 'bg-codomi-navy text-white shadow-md border-l-4 border-white'
-                      : 'text-gray-700 hover:bg-codomi-gray hover:text-codomi-navy hover:shadow-sm'
-                  }`
-                }
-              >
-                <item.icon className="mr-3 h-5 w-5" />
-                {item.label}
-              </NavLink>
-            </li>
-          ))}
-        </ul>
-      </nav>
+    <aside className="hidden md:block w-64 bg-white border-r border-gray-200 shadow-sm fixed left-0 top-16 h-[calc(100vh-4rem)] z-30 overflow-y-auto">
+      <div className="p-4">
+        <div className="flex items-center gap-3 mb-6 pb-4 border-b border-gray-100">
+          <div className="h-10 w-10 bg-codomi-navy rounded-lg flex items-center justify-center">
+            <span className="text-white font-bold text-lg">C</span>
+          </div>
+          <div>
+            <h2 className="font-bold text-codomi-navy text-lg">CODOMI</h2>
+            <p className="text-xs text-gray-600">Gestión de Condominios</p>
+          </div>
+        </div>
+        
+        <nav>
+          <ul className="space-y-1">
+            {menuItems.map((item) => (
+              <li key={item.path}>
+                <NavLink
+                  to={item.path}
+                  className={({ isActive }) =>
+                    `flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-all duration-200 group ${
+                      isActive
+                        ? 'bg-codomi-navy text-white shadow-sm'
+                        : 'text-gray-700 hover:bg-gray-50 hover:text-codomi-navy'
+                    }`
+                  }
+                >
+                  <item.icon className="mr-3 h-5 w-5 flex-shrink-0" />
+                  <span className="truncate">{item.label}</span>
+                </NavLink>
+              </li>
+            ))}
+          </ul>
+        </nav>
+      </div>
     </aside>
   );
 };
